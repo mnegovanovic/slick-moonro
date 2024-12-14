@@ -1,0 +1,55 @@
+html, body {
+  scroll-behavior: smooth;
+}
+
+body {
+  /*background-image:    url(/static/img/drops.jpeg);
+  background-size:     cover;
+  background-repeat:   no-repeat;
+  background-position: center center;*/
+}
+
+.navbar-brand {
+  color: greenyellow;
+}
+.navbar-brand:hover {
+  color: yellow;
+}
+
+.nav-link {
+  color: greenyellow;
+}
+.nav-link:hover {
+  color: yellow;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: royalblue;
+}
+
+h2 {
+  margin-top: 0.33em;
+  font-size: 1.25em;
+}
+
+a {
+  color: ivory;
+}
+
+p code, li code {
+  color: teal;
+}
+
+/*
+button.btn-dark {
+  border: 1px orange solid;
+  color: orange;
+}
+*/
+
+pre {
+  font-size: 0.85em;
+  color: white;
+  padding: 5px;
+  background: black;
+}

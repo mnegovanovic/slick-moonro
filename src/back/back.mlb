@@ -1,0 +1,14 @@
+$(SML_LIB)/basis/basis.mlb
+$(SML_LIB)/basis/lua.mlb
+
+../dist/sml-json/json.mlb
+../dist/sml-md5/md5.mlb
+../dist/slick.sml
+
+../shared/utils.sml
+../shared/web-action.sml
+
+test.sml
+back.sml
+dispatch.sml
+

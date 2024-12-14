@@ -1,0 +1,9 @@
+version = 1
+[diagnostics]
+#5011.severity = "warning"
+#4015.severity = "error"
+#5029.severity = "ignore"
+4015.severity = "ignore"
+4029.severity = "ignore"
+4033.severity = "ignore"
+5043.severity = "ignore"
