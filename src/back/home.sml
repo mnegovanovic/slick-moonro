@@ -1,17 +1,21 @@
+structure HomeActions =
+struct
+
 structure S = Slick
 structure WA = WebAction
+open Utils
 
-val _ = S.action ("/", (fn (S.Request req) =>
+do (
+S.action ("/", (fn (S.Request req) =>
     let in
         S.setResponseBody (S.Request req) (S.readFile "./static/app.html");
         S.setContentType (S.Request req) "text/html";
         S.flushRequest (S.Request req)
     end
-))
+));
 
-val _ = S.action ("/register_enquiry", (fn (S.Request req) =>
+S.action ("/register_enquiry", (fn (S.Request req) =>
     let
-        open Utils
         val errs = ref []
         val (_, post, _) = S.getRequestArgs ()
         
@@ -32,7 +36,7 @@ val _ = S.action ("/register_enquiry", (fn (S.Request req) =>
                     val mailer = valOf (!(#mailer req))
                     val mail_res = (S.sendHTMLMail mailer
                         "kiao.desouzza@gmail.com" (* from *)
-                        ["milos.negovanovic@hotmail.com"] (* to *)
+                        ["milosn@atreides-host.net"] (* to *)
                         [email] (* cc *)
                         ("Atreides Host Web Enquiry - "^name) (* subject *)
                         ("<html><h1>"^name^" - "^email^"</h1><p>"^msg^"</p></html>"))
@@ -53,17 +57,17 @@ val _ = S.action ("/register_enquiry", (fn (S.Request req) =>
         S.setContentType (S.Request req) "text/html";
         S.flushRequest (S.Request req)
     end
-))
+));
 
-val _ = S.action ("/hello_world", (fn (S.Request req) =>
+S.action ("/hello_world", (fn (S.Request req) =>
     let in
         S.setResponseBody (S.Request req) "Hello world from Slick&Moonro!";
         S.setContentType (S.Request req) "text/html";
         S.flushRequest (S.Request req)
     end
-))
+));
 
-val _ = S.action ("/md/[page]", (fn (S.Request req) =>
+S.action ("/md/[page]", (fn (S.Request req) =>
     let
         val page = valOf (S.findPairValue_ "page" (!(#path_args req)))
         val md = case page of
@@ -71,6 +75,7 @@ val _ = S.action ("/md/[page]", (fn (S.Request req) =>
             | "moonro-index-2" => S.readFile "./static/misc/moonro-md/index2.md"
             | "a-host-1" => S.readFile "./static/misc/a-host-md/1.md"
             | "a-host-2" => S.readFile "./static/misc/a-host-md/2.md"
+            | "a-host-3" => S.readFile "./static/misc/a-host-md/3.md"
             | _ => S.readFile "./static/misc/moonro-md/404.md"
     in
         S.setResponseBody (S.Request req) md;
@@ -78,4 +83,6 @@ val _ = S.action ("/md/[page]", (fn (S.Request req) =>
         S.flushRequest (S.Request req)
     end
 ))
+
+)end
 

@@ -1,6 +1,12 @@
-structure S = Slick
+structure TestActions =
+struct
 
-val _ = S.action ("/test/index", (fn (S.Request req) =>
+structure S = Slick
+structure WA = WebAction
+open Utils
+
+do (
+S.action ("/test/index", (fn (S.Request req) =>
     let in
         S.setResponseBody (S.Request req) ("<html>"
             ^"<h1>Slick&Monroo Tests</h1>"
@@ -17,10 +23,9 @@ val _ = S.action ("/test/index", (fn (S.Request req) =>
         S.setContentType (S.Request req) "text/html";
         S.flushRequest (S.Request req)
     end
-))
+));
 
-
-val _ = S.action ("/test/get_args", (fn (S.Request req) =>
+S.action ("/test/get_args", (fn (S.Request req) =>
     let in
         S.setResponseBody (S.Request req) ("<html>"
             ^"<h1>GET args</h1>"
@@ -29,9 +34,9 @@ val _ = S.action ("/test/get_args", (fn (S.Request req) =>
         S.setContentType (S.Request req) "text/html";
         S.flushRequest (S.Request req)
     end
-))
+));
 
-val _ = S.action ("/test/get_args_1", (fn (S.Request req) =>
+S.action ("/test/get_args_1", (fn (S.Request req) =>
     let
         val (get, _, _) = S.getRequestArgs ()
         val html = ref ("<html>"
@@ -53,9 +58,9 @@ val _ = S.action ("/test/get_args_1", (fn (S.Request req) =>
         S.setContentType (S.Request req) "text/html";
         S.flushRequest (S.Request req)
     end
-))
+));
 
-val _ = S.action ("/test/post_args", (fn (S.Request req) =>
+S.action ("/test/post_args", (fn (S.Request req) =>
     let in
         S.setResponseBody (S.Request req) ("<html>"
             ^"<h1>POST args</h1>"
@@ -68,9 +73,9 @@ val _ = S.action ("/test/post_args", (fn (S.Request req) =>
         S.setContentType (S.Request req) "text/html";
         S.flushRequest (S.Request req)
     end
-))
+));
 
-val _ = S.action ("/test/post_args_1", (fn (S.Request req) =>
+S.action ("/test/post_args_1", (fn (S.Request req) =>
     let
         val (_, post, _) = S.getRequestArgs ()
         val html = ref ("<html>"
@@ -92,9 +97,9 @@ val _ = S.action ("/test/post_args_1", (fn (S.Request req) =>
         S.setContentType (S.Request req) "text/html";
         S.flushRequest (S.Request req)
     end
-))
+));
 
-val _ = S.action ("/test/upload_files", (fn (S.Request req) =>
+S.action ("/test/upload_files", (fn (S.Request req) =>
     let in
         S.setResponseBody (S.Request req) ("<html>"
             ^"<h1>UPLOAD files</h1>"
@@ -107,9 +112,9 @@ val _ = S.action ("/test/upload_files", (fn (S.Request req) =>
         S.setContentType (S.Request req) "text/html";
         S.flushRequest (S.Request req)
     end
-))
+));
 
-val _ = S.action ("/test/upload_files_1", (fn (S.Request req) =>
+S.action ("/test/upload_files_1", (fn (S.Request req) =>
     let
         val (_, _, files) = S.getRequestArgs ()
         val html = ref ("<html>"
@@ -127,9 +132,9 @@ val _ = S.action ("/test/upload_files_1", (fn (S.Request req) =>
         S.setContentType (S.Request req) "text/html";
         S.flushRequest (S.Request req)
     end
-))
+));
 
-val _ = S.action ("/test/session", (fn (S.Request req) =>
+S.action ("/test/session", (fn (S.Request req) =>
     let
         val session = valOf (!(#session req))
 
@@ -146,9 +151,9 @@ val _ = S.action ("/test/session", (fn (S.Request req) =>
         S.setContentType (S.Request req) "text/html";
         S.flushRequest (S.Request req)
     end
-))
+));
 
-val _ = S.action ("/test/session_1", (fn (S.Request req) =>
+S.action ("/test/session_1", (fn (S.Request req) =>
     let
         val session = valOf (!(#session req))
         val html = ref ("<html>"
@@ -179,9 +184,9 @@ val _ = S.action ("/test/session_1", (fn (S.Request req) =>
         S.setContentType (S.Request req) "text/html";
         S.flushRequest (S.Request req)
     end
-))
+));
 
-val _ = S.action ("/test/session_2", (fn (S.Request req) =>
+S.action ("/test/session_2", (fn (S.Request req) =>
     let
         val _ = S.sessionCookieLogout ()
         val session = S.sessionCookieStart "xm6IiUyj9PLEZoad9Y7q"
@@ -210,9 +215,9 @@ val _ = S.action ("/test/session_2", (fn (S.Request req) =>
         S.setContentType (S.Request req) "text/html";
         S.flushRequest (S.Request req)
     end
-))
+));
 
-val _ = S.action ("/test/mysql_query", (fn (S.Request req) =>
+S.action ("/test/mysql_query", (fn (S.Request req) =>
     let
         val db = valOf (!(#mysql_db req))
         val rs = S.mysqlQuery db "select * from ads order by id asc;"
@@ -227,9 +232,9 @@ val _ = S.action ("/test/mysql_query", (fn (S.Request req) =>
         S.setContentType (S.Request req) "text/html";
         S.flushRequest (S.Request req)
     end
-))
+));
 
-val _ = S.action ("/test/mysql_columns", (fn (S.Request req) =>
+S.action ("/test/mysql_columns", (fn (S.Request req) =>
     let
         val db = valOf (!(#mysql_db req))
         val rs = S.mysqlQuery db "select * from ads order by id asc limit 1;"
@@ -243,9 +248,9 @@ val _ = S.action ("/test/mysql_columns", (fn (S.Request req) =>
         S.setContentType (S.Request req) "text/html";
         S.flushRequest (S.Request req)
     end
-))
+));
 
-val _ = S.action ("/test/http_post", (fn (S.Request req) =>
+S.action ("/test/http_post", (fn (S.Request req) =>
     case S.httpPOST "https://httpbin.org/post?a=a&b=b"
                     (S.httpEncodePOSTArgs [("test1", "test1"), ("test2", "test2")])
                     [("Test-Header", "test")] of
@@ -263,9 +268,9 @@ val _ = S.action ("/test/http_post", (fn (S.Request req) =>
                 S.setContentType (S.Request req) "text/html";
                 S.flushRequest (S.Request req)
             end
-))
+));
 
-val _ = S.action ("/test/http_get", (fn (S.Request req) =>
+S.action ("/test/http_get", (fn (S.Request req) =>
     case S.httpGET "https://httpbin.org/get?a=a&b=b"
                     [("Test-Header", "test")] of
         SOME (code, body, hs) =>
@@ -282,9 +287,9 @@ val _ = S.action ("/test/http_get", (fn (S.Request req) =>
                 S.setContentType (S.Request req) "text/html";
                 S.flushRequest (S.Request req)
             end
-))
+));
 
-val _ = S.action ("/test/mailer", (fn (S.Request req) =>
+S.action ("/test/mailer", (fn (S.Request req) =>
     let
         val mailer = valOf (!(#mailer req))
         val res = (S.sendHTMLMail mailer
@@ -300,3 +305,4 @@ val _ = S.action ("/test/mailer", (fn (S.Request req) =>
     end
 ))
 
+)end
