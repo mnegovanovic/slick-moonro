@@ -32,7 +32,7 @@ Lets have a look at top level directories and files:
     ├── src
     │   ├── back
     │   │   ├── back.mlb
-    │   │   ├── back.sml
+    │   │   ├── home.sml
     │   │   ├── dispatch.sml
     │   │   └── millet.toml
     │   ├── dist
@@ -77,15 +77,15 @@ we can deploy it further.
 ## Hello world <a id="_moonro_hello_world"></a>
 
 OK lets proceed with obligatory "hello world" example. Its pretty straight forward (you can find
-the code in `src/back/back.sml`):
+the code in `src/back/home.sml`):
       
-    val _ = S.action ("/hello_world", (fn (S.Request req) =>
+    S.action ("/hello_world", (fn (S.Request req) =>
         let in
             S.setResponseBody (S.Request req) "Hello world from Slick&Moonro!";
             S.setContentType (S.Request req) "text/html";
             S.flushRequest (S.Request req)
         end
-    ))
+    ));
 
 We define an __action__ with route pattern and handler function. In this example handler
 returns simple greeting. Have a look at `src/dist/slick.sml` for all the options.
