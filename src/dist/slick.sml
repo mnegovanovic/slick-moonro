@@ -49,6 +49,22 @@ structure Slick = struct
                     content
                 end
         end
+    
+    exception FileWrite of string
+    fun writeFile (path: string) (content: string): unit =
+        let
+            val open_ = Lua.field (Lua.global "io", "open")
+            val f = Lua.call1 open_ #[Lua.fromString path, Lua.fromString "w"]
+        in
+            if Lua.isFalsy f then
+                raise FileWrite "File open() failed"
+            else
+                let in
+                    Lua.method0 (f, "write") #[Lua.fromString content];
+                    Lua.method0 (f, "flush") #[];
+                    Lua.method0 (f, "close") #[]
+                end
+        end
 
     val urlencode = String.translate (
         fn c => if Char.isAlphaNum c
