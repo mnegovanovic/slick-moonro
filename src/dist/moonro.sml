@@ -474,7 +474,16 @@ struct
         in
             List.app loadDOM_ (!pages)
         end
-   
+
+    val _ = _export("navigate", fn (href: string) => navigate href true)
+    fun elemFromString (s: string): Js.elem =
+        let
+            val arg1 = ("el_string", J.string)
+            val stmt = "var el = $(el_string); $('a.page-link', el).on('click', function() {SMLtoJs.navigate ($(this).attr('href'));}); return el[0];"
+        in
+            fromForeignPtr (J.exec1 {stmt=stmt, arg1=arg1, res=J.fptr} (s))
+        end
+
     fun init (myInit: unit -> unit): unit =
         let
             fun mk404 () =
