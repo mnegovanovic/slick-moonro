@@ -23,8 +23,10 @@ struct
     
     datatype page = Page of {
         id: string,
+        title: string,
         pattern: string,
-        cs: component list
+        cs: component list,
+        props: (string * string) list
         }
 
     val pages: (string list * page) list ref = ref []
@@ -191,9 +193,19 @@ struct
             ()
         end
 
+    fun setCurrentTitle (title: string): unit =
+        let
+            val stmt1 = "$('#head_id title').remove();"
+            val stmt2 = "$('#head_id').append('<title>"^title^"</title>');"
+        in
+            J.exec0 {stmt=stmt1, res=J.unit} ();
+            J.exec0 {stmt=stmt2, res=J.unit} ()
+        end
+
     fun showPage (Page pg) (Request r) (do_push_state: bool): unit =
         let
             val id = #id pg
+            val title = #title pg
             val cs = #cs pg
             
             val path_info = #path_info r
@@ -215,6 +227,7 @@ struct
                             Js.appendChild target err_e
                         end
         in
+            setCurrentTitle title;
             List.app (showComp_ (Request r)) cs;
             hide ".pg-container";
             show ("#"^id);
@@ -425,16 +438,21 @@ struct
                 end
             | NONE => ()
 
-    fun mkPage (pattern: string) (cs: component list) (id: string option) =
+    fun mkPage (pattern: string) (cs: component list) (props: (string * string) list) =
         let
-            val id = case id of
+            val id = case (findPairValue "id" props) of
                 NONE => randID ()
                 | SOME id => id
+            val title = case (findPairValue "title" props) of
+                NONE => "Moonro page"
+                | SOME title => title
             
             val pg = Page {
                 pattern = pattern,
                 cs = cs,
-                id = id}
+                id = id,
+                title = title,
+                props = props}
         in
             regPage pg;
             pg
@@ -493,7 +511,7 @@ struct
                         (fn (r, e, p) => NONE)
                         NONE
                 in
-                    mkPage "/404-not-found" [c_404] NONE;
+                    mkPage "/404-not-found" [c_404] [("title", "404 - Not Found")];
                     ()
                 end
 
