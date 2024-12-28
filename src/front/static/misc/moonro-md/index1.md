@@ -32,8 +32,8 @@ Lets have a look at top level directories and files:
     ├── src
     │   ├── back
     │   │   ├── back.mlb
-    │   │   ├── home.sml
     │   │   ├── dispatch.sml
+    │   │   ├── home.sml
     │   │   └── millet.toml
     │   ├── dist
     │   │   ├── moonro.sml
@@ -189,7 +189,7 @@ friend (code in `src/front/front.sml`):
                   (taga "div" [("class", "col")] (todo_new_e & (tag0 "br") & todo_new_btn_e & (tag0 "br") & (tag0 "br"))))
             end
     val todo_new_c = M.mkComp mkTodoNew_ mkTodoNew__ NONE
-    val _ = M.mkPage "/moonro" [top_menu_c, moonro_toc_c, moonro1_c, todo_list_c, todo_new_c, moonro2_c] NONE
+    val _ = M.mkPage "/moonro" [top_menu_c, moonro_toc_c, moonro1_c, todo_list_c, todo_new_c, moonro2_c, main_footer_c] [("title", "Slick&Moonro - SML web application framework")]
 
 Moonro is simple front-end framework. In it, web application consists of pages and each page
 is made up of components. Its best to read the source code at `src/dist/moonro.sml`.
@@ -201,9 +201,9 @@ one random one will be generated).
     fun mkComp (onLoad: unit -> Js.elem) (onShow: (request * Js.elem * Js.elem) -> Js.elem option) (id: string option) =
         ...
 
-`mkPage` takes 3 arguments: URL pattern, component list, optional ID
+`mkPage` takes 3 arguments: URL pattern, component list, page props (id, title etc.)
 
-    fun mkPage (pattern: string) (cs: component list) (id: string option) =
+    fun mkPage (pattern: string) (cs: component list) (props: (string * string) list) =
         ...
 
 ## TODO
