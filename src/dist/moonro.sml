@@ -436,7 +436,7 @@ struct
                 in
                     showComp r (Comp c)
                 end
-            | NONE => ()
+            | NONE => raise Fail ("Moonro.reshow() unknown component: " ^ id)
 
     fun mkPage (pattern: string) (cs: component list) (props: (string * string) list) =
         let
