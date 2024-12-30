@@ -316,9 +316,7 @@ structure Slick = struct
         end   
 
     (*
-     *
      * SESSION
-     *
      *)
     exception CookieSessionInit of string
     fun sessionCookieInit (secret: string): unit =
@@ -440,9 +438,7 @@ structure Slick = struct
         end
     
     (*
-     *
      * MYSQL
-     *
      *)
     val mysql_module_: Lua.value option ref = ref NONE
     val mysql_db_: Lua.value option ref = ref NONE
@@ -586,9 +582,7 @@ structure Slick = struct
         end
  
     (*
-     *
      * GET args / POST args / UPLOAD files
-     *
      *)
     exception RequestArgs of string
     
@@ -628,9 +622,7 @@ structure Slick = struct
         end
 
     (*
-     *
      * HTTP client
-     *
      *)
     fun httpcRequireNew (): Lua.value option =
         let
@@ -733,9 +725,7 @@ structure Slick = struct
         String.concatWith "&" (List.map (fn (k,v) => urlencode(k)^"="^urlencode(v)) args)
 
     (*
-     *
      * MAILER
-     *
      *)
     fun mailerRequireNew (cfg: Lua.value): Lua.value option =
         let
@@ -794,5 +784,57 @@ structure Slick = struct
                 true  
         end
 
+    (*
+     * CRYPTO
+     *)
+    val md5_module_: Lua.value option ref = ref NONE
+    val uuid_module_: Lua.value option ref = ref NONE
+    fun initCrypto (): unit =
+        let
+            val (ok, module) = Lua.call2 Lua.Lib.pcall #[Lua.Lib.require, Lua.fromString "md5"]
+            val ok = Lua.unsafeFromValue ok : bool
+            val _ = if ok then
+                    md5_module_ := SOME module
+                else
+                    let in
+                        setStatusCode_ 500;
+                        say "Slick.initCrypto() failed to instantiate md5: pcall";
+                    end
+            
+            val (ok, module) = Lua.call2 Lua.Lib.pcall #[Lua.Lib.require, Lua.fromString "resty.uuid"]
+            val ok = Lua.unsafeFromValue ok : bool
+            val _ = if ok then
+                    uuid_module_ := SOME module
+                else
+                    let in
+                        setStatusCode_ 500;
+                        say "Slick.initCrypto() failed to instantiate resty.uuid: pcall";
+                    end
+
+        in
+            ()
+        end
+
+    fun md5hex (s: string): string =
+        let
+            val md5hex_ = Lua.field (valOf(!md5_module_), "sumhexa")
+        in
+            Lua.unsafeFromValue (Lua.call1 md5hex_ #[Lua.fromString s]) : string
+        end
+    
+    fun uuid (): string =
+        let
+            val generate_ = Lua.field (valOf(!uuid_module_), "generate")
+        in
+            Lua.unsafeFromValue (Lua.call1 generate_ #[]) : string
+        end
+
+    val random_md_5_counter_ = ref 0
+    fun randomMD5 (): string =
+        let
+            val _ = random_md_5_counter_ := !random_md_5_counter_ + 1
+        in
+            md5hex ((Int.toString (!random_md_5_counter_))^uuid ()^(LargeInt.toString (Time.toMilliseconds (Time.now ()))))
+        end
 end
 

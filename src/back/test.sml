@@ -19,6 +19,7 @@ S.action ("/test/index", (fn (S.Request req) =>
             ^"<a href='/test/http_get'>HTTP client GET</a><br />"
             ^"<a href='/test/http_post'>HTTP client POST</a><br />"
             ^"<a href='/test/mailer'>Mailer</a><br />"
+            ^"<a href='/test/crypto'>Crypto</a><br />"
             ^"</html>");
         S.setContentType (S.Request req) "text/html";
         S.flushRequest (S.Request req)
@@ -300,6 +301,29 @@ S.action ("/test/mailer", (fn (S.Request req) =>
             "<html><h1>test mail</h1></html>") (* body *)
     in
         S.setResponseBody (S.Request req) (if res then "OK" else "ERR");
+        S.setContentType (S.Request req) "text/html";
+        S.flushRequest (S.Request req)
+    end
+));
+
+S.action ("/test/crypto", (fn (S.Request req) =>
+    let
+        val test_hex = S.md5hex "test"
+        val test_test_hex = S.md5hex "test test"
+        val uuid1 = S.uuid ()
+        val uuid2 = S.uuid ()
+        val rand_md5_1 = S.randomMD5 ()
+        val rand_md5_2 = S.randomMD5 ()
+    in
+        S.setResponseBody (S.Request req) ("<html>"
+            ^"<h1>CRYPTO</h1>"
+            ^"test -> "^test_hex^(if test_hex = "098f6bcd4621d373cade4e832627b4f6" then " OK" else " FAIL")^"<br />"
+            ^"test test -> "^test_test_hex^(if test_test_hex = "4f4acc5d8c71f5fbf04dace00b5360c8" then " OK" else " FAIL")^"<br />"
+            ^"uuid1 -> "^uuid1^"<br />"
+            ^"uuid2 -> "^uuid2^"<br />"
+            ^"randomMD5 -> "^rand_md5_1^"<br />"
+            ^"randomMD5 -> "^rand_md5_2^"<br />"
+            ^"</html>");
         S.setContentType (S.Request req) "text/html";
         S.flushRequest (S.Request req)
     end
