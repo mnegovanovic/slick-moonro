@@ -476,7 +476,11 @@ struct
             fun loadDOM_ (ppath: string list, Page pg) =
                 let
                     val pg_id = #id pg
-                    val container_div = taga0 "div" [("id", pg_id),("class", "container pg-container mx-auto px-4")]
+                    val props = #props pg
+                    val page_class = case (findPairValue "page-class" props) of
+                        NONE => "pg-container"
+                        | SOME class => "pg-container "^class
+                    val container_div = taga0 "div" [("id", pg_id), ("class", page_class)]
                     val cs = #cs pg
                 in
                     List.app (loadComp container_div) cs;

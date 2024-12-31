@@ -145,7 +145,11 @@ fun mkContactForm__ (r, e, p) =
         NONE
     end
 val contact_form_c = M.mkComp mkContactForm_ mkContactForm__ NONE
-val _ = M.mkPage "/" [top_menu_c, a_host_c, contact_form_c, main_footer_c] [("title", "Atreides Host - Bespoke digital solutions for businesses")]
+val _ = M.mkPage "/" [top_menu_c,
+                      a_host_c,
+                      contact_form_c,
+                      main_footer_c] [("title", "Atreides Host - Bespoke digital solutions for businesses"),
+                                      ("page-class", "container mx-auto px-4")]
 
 (*
  * MOONRO
@@ -291,7 +295,14 @@ fun mkTodoNew__ (r, e, p) =
               (taga "div" [("class", "col")] (todo_new_e & (tag0 "br") & todo_new_btn_e & (tag0 "br") & (tag0 "br"))))
         end
 val todo_new_c = M.mkComp mkTodoNew_ mkTodoNew__ NONE
-val _ = M.mkPage "/moonro" [top_menu_c, moonro_toc_c, moonro1_c, todo_list_c, todo_new_c, moonro2_c, main_footer_c] [("title", "Slick&Moonro - SML web application framework")]
+val _ = M.mkPage "/moonro" [top_menu_c,
+                            moonro_toc_c,
+                            moonro1_c,
+                            todo_list_c,
+                            todo_new_c,
+                            moonro2_c,
+                            main_footer_c] [("title", "Slick&Moonro - SML web application framework"),
+                                            ("page-class", "container mx-auto px-4")]
 
 (*
  * CMS
