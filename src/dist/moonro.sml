@@ -34,6 +34,18 @@ struct
     val fragments: (string*string) list ref = ref []
     val fe_session: FESession.fe_session ref = ref []
 
+    fun copyComp (Comp c: component): component =
+        let
+            val c1 = Comp {
+                id = #id c,
+                e = ref NONE,
+                parent = ref NONE,
+                onLoad = #onLoad c,
+                onShow = #onShow c}
+        in
+            c1
+        end
+
     fun findPairValue _ [] = NONE
         | findPairValue x ((k,v)::ks) = if k = x then SOME v else findPairValue x ks
     
@@ -179,15 +191,15 @@ struct
    fun showComp (Request r) (Comp cmp) =
         let
             val onShowFN = #onShow cmp
-            val e_on_load = valOf (! (#e cmp))
+            val e_current = valOf (! (#e cmp))
             val target = valOf (! (#parent cmp))
         in
-            case onShowFN (Request r, e_on_load, target) of
+            case onShowFN (Request r, e_current, target) of
                 SOME e =>
                     let in
-                        Js.replaceChild target e e_on_load;
+                        Js.replaceChild target e e_current;
                         (#e cmp) := SOME e;
-                        (#parent cmp) := SOME target;
+                        (*(#parent cmp) := SOME target;*)
                         ()
                     end
                 | NONE => ();
@@ -438,8 +450,10 @@ struct
         end
     
     fun reshow (id: string) =
-        case (findPairValue id (!components)) of
-            SOME (Comp c) => let
+        let
+            val cs = List.filter (fn (id1, c) => id = id1) (!components)
+            fun reshowComp_ (id: string, Comp c: component) =
+                let
                     val r = Request {
                         request_uri = "",
                         path_info = "",
@@ -448,7 +462,9 @@ struct
                 in
                     showComp r (Comp c)
                 end
-            | NONE => raise Fail ("Moonro.reshow() unknown component: " ^ id)
+        in
+            List.app reshowComp_ cs
+        end
 
     fun mkPage (pattern: string) (cs: component list) (props: (string * string) list) =
         let
