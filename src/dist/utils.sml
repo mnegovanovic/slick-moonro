@@ -1,4 +1,4 @@
-structure Utils = struct     
+structure SMUtils = struct     
      val urlencode = String.translate (
         fn c => if Char.isAlphaNum c
                 then String.str c
