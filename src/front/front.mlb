@@ -3,9 +3,10 @@ $SML_LIB/basis/js.mlb
 
 ../dist/sml-json/json.mlb
 ../dist/sml-md5/md5.mlb
+../dist/utils.sml
+../dist/frontend-session.sml
 ../dist/moonro.sml
 
-../shared/utils.sml
 ../shared/web-action.sml
 front.sml
 

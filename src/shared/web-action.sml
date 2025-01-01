@@ -1,5 +1,5 @@
 structure WebAction = struct
-    open Utils
+    open SMUtils
     
     datatype result = Result of {
         ok:     bool,

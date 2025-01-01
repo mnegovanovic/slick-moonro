@@ -3,7 +3,7 @@ struct
 
 structure S = Slick
 structure WA = WebAction
-open Utils
+open SMUtils
 
 do (
 S.action ("/test/index", (fn (S.Request req) =>
