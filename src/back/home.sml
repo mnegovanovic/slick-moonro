@@ -3,7 +3,7 @@ struct
 
 structure S = Slick
 structure WA = WebAction
-open Utils
+open SMUtils
 
 do (
 S.action ("/", (fn (S.Request req) =>
@@ -79,6 +79,17 @@ S.action ("/md/[page]", (fn (S.Request req) =>
             | _ => S.readFile "./static/misc/moonro-md/404.md"
     in
         S.setResponseBody (S.Request req) md;
+        S.setContentType (S.Request req) "text/html";
+        S.flushRequest (S.Request req)
+    end
+));
+
+
+S.action ("/sm/fe_session_get", (fn (S.Request req) =>
+    let
+        val session = [("user", "anon")]
+    in
+        S.setResponseBody (S.Request req) (FESession.dump session);
         S.setContentType (S.Request req) "text/html";
         S.flushRequest (S.Request req)
     end

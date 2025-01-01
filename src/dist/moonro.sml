@@ -32,6 +32,7 @@ struct
     val pages: (string list * page) list ref = ref []
     val components: (string * component) list ref = ref []
     val fragments: (string*string) list ref = ref []
+    val fe_session: FESession.fe_session ref = ref []
 
     fun findPairValue _ [] = NONE
         | findPairValue x ((k,v)::ks) = if k = x then SOME v else findPairValue x ks
@@ -226,15 +227,26 @@ struct
                             log msg;
                             Js.appendChild target err_e
                         end
+
+            fun showPage_ () =
+                let in
+                    setCurrentTitle title;
+                    List.app (showComp_ (Request r)) cs;
+                    hide ".pg-container";
+                    show ("#"^id);
+                    if do_push_state then
+                        pushState [] ("#"^path_info^query_string)
+                    else
+                        ()
+                end
+
+            fun onSession_ data =
+                let in
+                    fe_session := FESession.load data;
+                    showPage_ ()
+                end 
         in
-            setCurrentTitle title;
-            List.app (showComp_ (Request r)) cs;
-            hide ".pg-container";
-            show ("#"^id);
-            if do_push_state then
-                pushState [] ("#"^path_info^query_string)
-            else
-                ();
+            jqGET "/sm/fe_session_get" "" onSession_;
             ()
         end
 
@@ -501,7 +513,7 @@ struct
     fun elemFromString (s: string): Js.elem =
         let
             val arg1 = ("el_string", J.string)
-            val stmt = "var el = $(el_string); $('a.page-link', el).on('click', function() {SMLtoJs.navigate ($(this).attr('href'));}); return el[0];"
+            val stmt = "var el = $(el_string); $('a.page-link', el).on('click', function() {SMLtoJs.navigate ($(this).attr('href')); return false;}); return el[0];"
         in
             fromForeignPtr (J.exec1 {stmt=stmt, arg1=arg1, res=J.fptr} (s))
         end
