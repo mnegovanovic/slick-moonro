@@ -17,7 +17,7 @@ struct
         id: string,
         e: Js.elem option ref,
         parent: Js.elem option ref,
-        onLoad: unit -> Js.elem,
+        onLoad: unit -> Js.elem option,
         onShow: (request * Js.elem * Js.elem) -> Js.elem option
         }
     
@@ -432,7 +432,7 @@ struct
             e
         end
 
-    fun mkComp (onLoad: unit -> Js.elem) (onShow: (request * Js.elem * Js.elem) -> Js.elem option) (id: string option) =
+    fun mkComp (onLoad: unit -> Js.elem option) (onShow: (request * Js.elem * Js.elem) -> Js.elem option) (id: string option) =
         let
             val id = case id of
                 NONE => randID ()
@@ -489,7 +489,9 @@ struct
     fun loadComp (target: Js.elem) (Comp cmp) =
         let
             val onLoadFN = #onLoad cmp
-            val e = onLoadFN ()
+            val e = case onLoadFN () of
+                NONE => tag "div" ($"onLoadFN() returned NONE, element placeholder")
+                | SOME e => e
         in
             (#e cmp) := SOME e;
             (#parent cmp) := SOME target;
@@ -539,7 +541,7 @@ struct
             fun mk404 () =
                 let
                     val c_404 = mkComp
-                        (fn () => taga "div" [("class", "row")] (tag "h1" ($"404 - Not Found")))
+                        (fn () => SOME (taga "div" [("class", "row")] (tag "h1" ($"404 - Not Found"))))
                         (fn (r, e, p) => NONE)
                         NONE
                 in

@@ -58,7 +58,7 @@ fun mkTopMenu_ () =
             (*& (M.mkA "more-content" "#/cms/index" "btn btn-ghost text-base")*)
         )
     in
-        e
+        SOME e
     end
 val top_menu_c = M.mkComp mkTopMenu_ (fn (r, e, p) => NONE) NONE
 
@@ -69,7 +69,7 @@ fun mkFooter_ () =
             tag "p" ($"Copyright (c) 2024 - All rights reserved by Atreides Host"))
         )
     in
-        e
+        SOME e
     end
 val main_footer_c = M.mkComp mkFooter_ (fn (r, e, p) => NONE) NONE
 
@@ -84,7 +84,7 @@ fun mkAHost_ () =
             & taga0 "div" [("id", "a_host_2"), ("class", "text-base")]
             & taga0 "img" [("class", "rounded"), ("src", "/static/img/drops.jpeg"), ("alt", "drops")])
     in
-        e
+        SOME e
     end
 fun mkAHost__ (r, e, p) =
     let
@@ -122,7 +122,7 @@ fun mkContactForm_ () =
           & taga0 "div" [("class", "mt-4 alert-container"), ("style", "display: none;")]
         )
     in
-        e
+        SOME e
     end
 fun mkContactForm__ (r, e, p) =
     let
@@ -165,7 +165,7 @@ fun mkMoonroTOC_ () =
         Js.appendChild e (M.mkF "Hello world" "#_moonro_hello_world" "#/moonro" "fragment-link");
         Js.appendChild e (tag0 "br");
         Js.appendChild e (M.mkF "TODO app" "#_moonro_todo_app" "#/moonro" "fragment-link");
-        e
+        SOME e
     end
 val moonro_toc_c = M.mkComp mkMoonroTOC_ (fn (r, e, p) => NONE) NONE
 
@@ -173,7 +173,7 @@ fun mkMoonro1_ () =
     let
         val e = taga0 "div" [("id", "moonro_id_1"), ("class", "content")]
     in
-        e
+        SOME e
     end
 fun mkMoonro1__ (r, e, p) =
     let
@@ -189,7 +189,7 @@ fun mkMoonro2_ () =
     let
         val e = taga0 "div" [("id", "moonro_id_2"), ("class", "content")]
     in
-        e
+        SOME e
     end
 fun mkMoonro2__ (r, e, p) =
     let
@@ -220,7 +220,7 @@ fun mkTodoList_ () =
     let
         val e = taga0 "div" [("id", "todo_list"), ("class", "row todo-list")]
     in
-        e
+        SOME e
     end
 fun mkTodoList__ (r, e, p) =
     let
@@ -264,7 +264,7 @@ fun mkTodoNew_ () =
     let
         val e = taga0 "div" [("id", "todo_new"), ("class", "row todo-new")]
     in
-        e
+        SOME e
     end
 fun mkTodoNew__ (r, e, p) =
         let 
