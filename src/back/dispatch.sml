@@ -3,6 +3,7 @@ structure S = Slick
 structure export = struct
     fun dispatch () =
         let
+            val _ = S.initCrypto ()
             val _ = S.sessionCookieInit "test"
             
             fun connectMySql (): Lua.value option =
