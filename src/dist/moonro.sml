@@ -178,7 +178,7 @@ struct
             J.exec1 {stmt=stmt, arg1=arg1, res=J.unit} (f)
         end
 
-    fun instalKeypressEventHandler (e: Js.elem) (kc: int) (f: unit -> bool) : unit =
+    fun installKeypressEventHandler (e: Js.elem) (kc: int) (f: unit -> bool) : unit =
         let
             val arg1 = ("e", J.fptr)
             val arg2 = ("kc", J.int)

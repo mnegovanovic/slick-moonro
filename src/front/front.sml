@@ -277,7 +277,7 @@ fun mkTodoNew__ (r, e, p) =
                     M.reshow "todo_list_c";
                     false
                 end
-            val _ = M.instalKeypressEventHandler todo_new_e 13 keypress_
+            val _ = M.installKeypressEventHandler todo_new_e 13 keypress_
 
             val todo_new_btn_e = taga "button" [("id", "todo_new_btn"), ("class", "btn btn-outline btn-primary")] ($"new")
             fun click_ () =
