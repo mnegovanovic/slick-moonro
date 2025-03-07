@@ -79,8 +79,10 @@ struct
             val pattern = #pattern p
             val pparts = String.fields (fn c => c = #"/") pattern
             val pparts = List.filter (fn p => p <> "") pparts
+            val cs = #cs p
         in
-            pages := (pparts, Page p) :: (!pages)
+            pages := (pparts, Page p) :: (!pages);
+            List.app (fn (Comp c) => components := (#id c, Comp c)::(!components)) cs
         end
    
     fun jqGET (url: string) (data: string) (cbfn: string -> unit) =
@@ -445,7 +447,6 @@ struct
                 onLoad = onLoad,
                 onShow = onShow}
         in
-            components := (id,c)::(!components);
             c
         end
     
