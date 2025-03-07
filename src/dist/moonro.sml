@@ -474,10 +474,11 @@ struct
             val title = case (findPairValue "title" props) of
                 NONE => "Moonro page"
                 | SOME title => title
+            val comps = List.map copyComp cs
             
             val pg = Page {
                 pattern = pattern,
-                cs = cs,
+                cs = comps,
                 id = id,
                 title = title,
                 props = props}
