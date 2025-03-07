@@ -1,19 +1,19 @@
 #!/bin/bash
 rm -rf lua_modules/*
 #luarocks --lua-version=5.1 --tree lua_modules install pgmoon
-luarocks --lua-version=5.1 --tree lua_modules install sha2
-luarocks --lua-version=5.1 --tree lua_modules install md5
-luarocks --lua-version=5.1 --tree lua_modules install lbase64
-luarocks --lua-version=5.1 --tree lua_modules install lua-resty-uuid
-luarocks --lua-version=5.1 --tree lua_modules install lua-resty-exec
-luarocks --lua-version=5.1 --tree lua_modules install lua-resty-session
-luarocks --lua-version=5.1 --tree lua_modules install lua-resty-http
-luarocks --lua-version=5.1 --tree lua_modules install lua-resty-mail
-luarocks --lua-version=5.1 --tree lua_modules install lua-resty-reqargs
-luarocks --lua-version=5.1 --tree lua_modules install net-url
-luarocks --lua-version=5.1 --tree lua_modules install aspect
-luarocks --lua-version=5.1 --tree lua_modules install luafilesystem
-luarocks --lua-version=5.1 --tree lua_modules install web_sanitize
-luarocks --lua-version=5.1 --tree lua_modules install lua-discount
-luarocks --lua-version=5.1 --tree lua_modules install inspect
+luarocks --lua-version=5.1 --tree lua_modules install sha2 &&
+	luarocks --lua-version=5.1 --tree lua_modules install md5 &&
+	luarocks --lua-version=5.1 --tree lua_modules install lbase64 &&
+	luarocks --lua-version=5.1 --tree lua_modules install lua-resty-uuid &&
+	luarocks --lua-version=5.1 --tree lua_modules install lua-resty-exec &&
+	luarocks --lua-version=5.1 --tree lua_modules install lua-resty-session &&
+	luarocks --lua-version=5.1 --tree lua_modules install lua-resty-http &&
+	luarocks --lua-version=5.1 --tree lua_modules install lua-resty-mail &&
+	luarocks --lua-version=5.1 --tree lua_modules install lua-resty-reqargs &&
+	luarocks --lua-version=5.1 --tree lua_modules install net-url &&
+	luarocks --lua-version=5.1 --tree lua_modules install aspect &&
+	luarocks --lua-version=5.1 --tree lua_modules install luafilesystem &&
+	luarocks --lua-version=5.1 --tree lua_modules install web_sanitize &&
+	luarocks --lua-version=5.1 --tree lua_modules install lua-discount &&
+	luarocks --lua-version=5.1 --tree lua_modules install inspect
 
