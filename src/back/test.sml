@@ -253,7 +253,7 @@ S.action ("/test/mysql_columns", (fn (S.Request req) =>
 
 S.action ("/test/http_post", (fn (S.Request req) =>
     case S.httpPOST "https://httpbin.org/post?a=a&b=b"
-                    (S.httpEncodePOSTArgs [("test1", "test1"), ("test2", "test2")])
+                    (httpEncodePOSTArgs [("test1", "test1"), ("test2", "test2")])
                     [("Test-Header", "test")] of
         SOME (code, body, hs) =>
             let in

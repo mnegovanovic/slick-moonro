@@ -38,5 +38,8 @@ structure SMUtils = struct
         in
             String.implode (rev stripped)
         end
+
+    fun httpEncodePOSTArgs (args: (string*string)list): string =
+        String.concatWith "&" (List.map (fn (k,v) => urlencode(k)^"="^urlencode(v)) args)
 end
 
