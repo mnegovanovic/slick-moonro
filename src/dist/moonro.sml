@@ -74,6 +74,14 @@ struct
             J.exec1 {stmt=stmt, arg1=arg1, res=J.string} (s)
         end
 
+    fun md5hex (s: string): string =
+        let
+            val arg1 = ("s", J.string)
+            val stmt = "return md5(s);"
+        in
+            J.exec1 {stmt=stmt, arg1=arg1, res=J.string} (s)
+        end
+
     fun regPage (Page p): unit =
         let
             val pattern = #pattern p
