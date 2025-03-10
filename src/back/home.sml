@@ -19,11 +19,11 @@ S.action ("/register_enquiry", (fn (S.Request req) =>
         val errs = ref []
         val (_, post, _) = S.getRequestArgs ()
         
-        val name = strip (valOf (S.findPairValue_ "name" post)) [#" ", #"\t"]
+        val name = strip (valOf (findPairValue "name" post)) [#" ", #"\t"]
         val _ = if (String.size name) < 1 then errs := ("name", "Missing name")::(!errs) else ()
-        val email = strip (valOf (S.findPairValue_ "email" post)) [#" ", #"\t"]
+        val email = strip (valOf (findPairValue "email" post)) [#" ", #"\t"]
         val _ = if (String.size email) < 1 then errs := ("email", "Missing email")::(!errs) else ()
-        val msg = strip (valOf (S.findPairValue_ "msg" post)) [#" ", #"\t"]
+        val msg = strip (valOf (findPairValue "msg" post)) [#" ", #"\t"]
         val _ = if (String.size msg) < 1 then errs := ("msg", "Missing message")::(!errs) else ()
         
         val res = if (List.length (!errs)) > 0 then
@@ -69,7 +69,7 @@ S.action ("/hello_world", (fn (S.Request req) =>
 
 S.action ("/md/[page]", (fn (S.Request req) =>
     let
-        val page = valOf (S.findPairValue_ "page" (!(#path_args req)))
+        val page = valOf (findPairValue "page" (!(#path_args req)))
         val md = case page of
             "moonro-index-1" => S.readFile "./static/misc/moonro-md/index1.md"
             | "moonro-index-2" => S.readFile "./static/misc/moonro-md/index2.md"

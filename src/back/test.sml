@@ -44,11 +44,11 @@ S.action ("/test/get_args_1", (fn (S.Request req) =>
             ^"<h1>GET args</h1>"
             ^"<p>")
     in
-        case (S.findPairValue_ "test1" get) of
+        case (findPairValue "test1" get) of
             NONE => html := (!html)^"test1: value is NONE<br />"
             | SOME v => html := (!html)^"test1: "^v^"<br />";
         
-        case (S.findPairValue_ "test2" get) of
+        case (findPairValue "test2" get) of
             NONE => html := (!html)^"test2: value is NONE<br />"
             | SOME v => html := (!html)^"test2: "^v^"<br />";
             
@@ -83,11 +83,11 @@ S.action ("/test/post_args_1", (fn (S.Request req) =>
             ^"<h1>POST args</h1>"
             ^"<p>")
     in
-        case (S.findPairValue_ "test1" post) of
+        case (findPairValue "test1" post) of
             NONE => html := (!html)^"test1: value is NONE<br />"
             | SOME v => html := (!html)^"test1: "^v^"<br />";
         
-        case (S.findPairValue_ "test2" post) of
+        case (findPairValue "test2" post) of
             NONE => html := (!html)^"test2: value is NONE<br />"
             | SOME v => html := (!html)^"test2: "^v^"<br />";
             
@@ -121,7 +121,7 @@ S.action ("/test/upload_files_1", (fn (S.Request req) =>
         val html = ref ("<html>"
             ^"<h1>UPLOAD files</h1>"
             ^"<p>")
-        val file = valOf (S.findPairValue_ "fileToUpload" files)
+        val file = valOf (findPairValue "fileToUpload" files)
         fun echoFile_ [] acc = acc
             | echoFile_ ((k,v)::fs) acc = echoFile_ fs (acc^k^" -> "^v^"<br />")
     in
