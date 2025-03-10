@@ -793,7 +793,7 @@ structure Slick = struct
             Lua.unsafeFromValue (Lua.call1 md5hex_ #[Lua.fromString s]) : string
         end
     
-    fun uuid (): string =
+    fun uuidv4 (): string =
         let
             val generate_ = Lua.field (valOf(!uuid_module_), "generate")
         in
@@ -805,7 +805,7 @@ structure Slick = struct
         let
             val _ = random_md_5_counter_ := !random_md_5_counter_ + 1
         in
-            md5hex ((Int.toString (!random_md_5_counter_))^uuid ()^(LargeInt.toString (Time.toMilliseconds (Time.now ()))))
+            md5hex ((Int.toString (!random_md_5_counter_))^uuidv4 ()^(LargeInt.toString (Time.toMilliseconds (Time.now ()))))
         end
 end
 

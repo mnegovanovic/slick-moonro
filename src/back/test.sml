@@ -310,8 +310,8 @@ S.action ("/test/crypto", (fn (S.Request req) =>
     let
         val test_hex = S.md5hex "test"
         val test_test_hex = S.md5hex "test test"
-        val uuid1 = S.uuid ()
-        val uuid2 = S.uuid ()
+        val uuid1 = S.uuidv4 ()
+        val uuid2 = S.uuidv4 ()
         val rand_md5_1 = S.randomMD5 ()
         val rand_md5_2 = S.randomMD5 ()
     in
