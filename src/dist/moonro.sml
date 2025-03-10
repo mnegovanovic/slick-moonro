@@ -51,13 +51,6 @@ struct
     
     fun log s = J.call1 ("console.log", J.string, J.unit) s
 
-    fun randID () =
-        let
-            val stmt = "return URL.createObjectURL(new Blob()).substr(-36);"
-        in
-            J.exec0 {stmt=stmt, res=J.string} ()
-        end
-    
     fun encode (s: string): string =
         let
             val arg1 = ("s", J.string)
@@ -80,6 +73,21 @@ struct
             val stmt = "return md5(s);"
         in
             J.exec1 {stmt=stmt, arg1=arg1, res=J.string} (s)
+        end
+
+    fun uuidv4 (): string =
+        let
+            val stmt = "return window.crypto.randomUUID();"
+        in
+            J.exec0 {stmt=stmt, res=J.string} ()
+        end
+    
+    val random_md_5_counter_ = ref 0
+    fun randomMD5 (): string =
+        let
+            val _ = random_md_5_counter_ := !random_md_5_counter_ + 1
+        in
+            md5hex ((Int.toString (!random_md_5_counter_))^uuidv4 ()^(LargeInt.toString (Time.toMilliseconds (Time.now ()))))
         end
 
     fun regPage (Page p): unit =
@@ -445,7 +453,7 @@ struct
     fun mkComp (onLoad: unit -> Js.elem option) (onShow: (request * Js.elem * Js.elem) -> Js.elem option) (id: string option) =
         let
             val id = case id of
-                NONE => randID ()
+                NONE => randomMD5 ()
                 | SOME id => id
             
             val c = Comp {
@@ -478,7 +486,7 @@ struct
     fun mkPage (pattern: string) (cs: component list) (props: (string * string) list) =
         let
             val id = case (findPairValue "id" props) of
-                NONE => randID ()
+                NONE => randomMD5 ()
                 | SOME id => id
             val title = case (findPairValue "title" props) of
                 NONE => "Moonro page"
@@ -515,12 +523,12 @@ struct
             
             fun loadDOM_ (ppath: string list, Page pg) =
                 let
-                    val pg_id = #id pg
+                    val page_id = #id pg
                     val props = #props pg
                     val page_class = case (findPairValue "page-class" props) of
                         NONE => "pg-container"
                         | SOME class => "pg-container "^class
-                    val container_div = taga0 "div" [("id", pg_id), ("class", page_class)]
+                    val container_div = taga0 "div" [("id", page_id), ("class", page_class)]
                     val cs = #cs pg
                 in
                     List.app (loadComp container_div) cs;
