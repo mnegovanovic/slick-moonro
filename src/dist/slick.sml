@@ -1,6 +1,6 @@
 structure Slick = struct
-    open SMUtils
 
+    open SMUtils
     datatype response = Response of {
         code:           int ref,
         body:           string ref,
@@ -24,9 +24,6 @@ structure Slick = struct
     type action_fn = request -> unit
 
     val actions: (string list * action_fn) list ref = ref []
-    
-    fun findPairValue_ _ [] = NONE
-        | findPairValue_ x ((k,v)::ks) = if k = x then SOME v else findPairValue_ x ks
     
     fun stringListToLuaArray_ (l: string list): Lua.value =
         let
@@ -515,7 +512,7 @@ structure Slick = struct
     
     fun cInt (row: (string*string) list) (c: string): int option =
         let
-            val res = case findPairValue_ c row of
+            val res = case findPairValue c row of
                 NONE => raise InvalidColumn ("Unknown column "^c)
                 | SOME v => case v of
                     "userdata: NULL" => NONE
@@ -526,7 +523,7 @@ structure Slick = struct
     
     fun cReal (row: (string*string) list) (c: string): real option =
         let
-            val res = case findPairValue_ c row of
+            val res = case findPairValue c row of
                 NONE => raise InvalidColumn ("Unknown column "^c)
                 | SOME v => case v of
                     "userdata: NULL" => NONE
@@ -537,7 +534,7 @@ structure Slick = struct
     
     fun cBool (row: (string*string) list) (c: string): bool option =
         let
-            val res = case findPairValue_ c row of
+            val res = case findPairValue c row of
                 NONE => raise InvalidColumn ("Unknown column "^c)
                 | SOME v => case v of
                     "userdata: NULL" => NONE
@@ -549,7 +546,7 @@ structure Slick = struct
 
     fun cString (row: (string*string) list) (c: string): string option =
         let
-            val res = case findPairValue_ c row of
+            val res = case findPairValue c row of
                 NONE => raise InvalidColumn ("Unknown column "^c)
                 | SOME v => case v of
                     "userdata: NULL" => NONE

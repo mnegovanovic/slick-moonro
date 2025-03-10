@@ -5,7 +5,8 @@ struct
     structure O = JsCore.Object
     structure A = JsCore.Array
     open Js.Element infix &
-    
+    open SMUtils
+
     datatype request = Request of {
         request_uri:    string,
         path_info:      string,
@@ -46,9 +47,6 @@ struct
             c1
         end
 
-    fun findPairValue _ [] = NONE
-        | findPairValue x ((k,v)::ks) = if k = x then SOME v else findPairValue x ks
-    
     fun log s = J.call1 ("console.log", J.string, J.unit) s
 
     fun encode (s: string): string =
