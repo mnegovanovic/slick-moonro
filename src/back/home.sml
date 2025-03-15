@@ -71,12 +71,12 @@ S.action ("/md/[page]", (fn (S.Request req) =>
     let
         val page = valOf (findPairValue "page" (!(#path_args req)))
         val md = case page of
-            "moonro-index-1" => S.readFile "./static/misc/moonro-md/index1.md"
-            | "moonro-index-2" => S.readFile "./static/misc/moonro-md/index2.md"
-            | "a-host-1" => S.readFile "./static/misc/a-host-md/1.md"
-            | "a-host-2" => S.readFile "./static/misc/a-host-md/2.md"
-            | "a-host-3" => S.readFile "./static/misc/a-host-md/3.md"
-            | _ => S.readFile "./static/misc/moonro-md/404.md"
+            "moonro-index-1" => S.readFile "../var/moonro-md/index1.md"
+            | "moonro-index-2" => S.readFile "../var/moonro-md/index2.md"
+            | "a-host-1" => S.readFile "../var/a-host-md/1.md"
+            | "a-host-2" => S.readFile "../var/a-host-md/2.md"
+            | "a-host-3" => S.readFile "../var/a-host-md/3.md"
+            | _ => S.readFile "../var/moonro-md/404.md"
     in
         S.setResponseBody (S.Request req) md;
         S.setContentType (S.Request req) "text/html";
