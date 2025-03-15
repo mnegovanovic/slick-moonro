@@ -437,16 +437,17 @@ structure Slick = struct
                         end
                     else
                         let
-                            val (ok, err, errcode) = Lua.method3 (db, "connect") #[cfg]
+                            val (ok, err, errcode, sqlstate) = Lua.method4 (db, "connect") #[cfg]
                             val ok = Lua.unsafeFromValue ok : bool
                         in
                             if not ok then
                                 let
                                     val err = Lua.unsafeFromValue err : string
                                     val errcode = Lua.unsafeFromValue errcode : string
+                                    val sqlstate = Lua.unsafeFromValue sqlstate : string
                                 in
                                     setStatusCode_ 500;
-                                    say ("Slick.mysqlRequireNew() failed to connect to DB: "^err^": "^errcode);
+                                    say ("Slick.mysqlRequireNew() failed to connect to DB: "^err^", "^errcode^": "^sqlstate);
                                     NONE
                                 end
                             else
