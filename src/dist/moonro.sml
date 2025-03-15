@@ -163,6 +163,13 @@ struct
             ()
         end
     
+    fun showHideWithTimer (selector: string) (i: int): unit =
+        let in
+            show selector;
+            Js.setTimeout i (fn () => hide selector);
+            ()
+        end
+    
     fun addClass selector class =
         let
             val stmt = "$('"^selector^"').addClass('"^class^"');"
@@ -249,7 +256,7 @@ struct
                 end handle
                     exc => let
                             val target = valOf (! (#e c))
-                            val msg = "Moonro.showPage.showComp_() exception "^(exnName exc)^" "^(exnMessage exc)
+                            val msg = "Moonro.showPage.showComp_() exception "^(exnName exc)^" "^(exnMessage exc)^" component ID: "^(#id c)
                             val err_e = taga "div" [("style", "color: red; font-size: 2em;")] ($(msg))
                         in
                             log msg;
