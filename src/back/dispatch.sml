@@ -1,6 +1,7 @@
-structure S = Slick
-
-structure export = struct
+structure export =
+struct
+    structure S = Slick
+    
     fun dispatch () =
         let
             val _ = S.initCrypto ()
@@ -10,11 +11,11 @@ structure export = struct
                 let 
                     val cfg = Lua.newTable ()
                 in
-                    Lua.setField (cfg, "host", Lua.fromString "127.0.0.1");
-                    Lua.setField (cfg, "port", Lua.fromInt 3306);
-                    Lua.setField (cfg, "database", Lua.fromString "test");
-                    Lua.setField (cfg, "user", Lua.fromString "test");
-                    Lua.setField (cfg, "password", Lua.fromString "test");
+                    Lua.setField (cfg, "host", Lua.fromString (S.getENVString "MYSQL_HOST"));
+                    Lua.setField (cfg, "port", Lua.fromInt (S.getENVInt "MYSQL_PORT"));
+                    Lua.setField (cfg, "database", Lua.fromString (S.getENVString "MYSQL_DB"));
+                    Lua.setField (cfg, "user", Lua.fromString (S.getENVString "MYSQL_USER"));
+                    Lua.setField (cfg, "password", Lua.fromString (S.getENVString "MYSQL_PASS"));
                     Lua.setField (cfg, "charset", Lua.fromString "utf8");
                     Lua.setField (cfg, "max_packet_size", Lua.fromInt (1024 * 1024));
                     
@@ -25,15 +26,15 @@ structure export = struct
                 let 
                     val cfg = Lua.newTable ()
                 in
-                    Lua.setField (cfg, "host", Lua.fromString "smtp.gmail.com");
-                    Lua.setField (cfg, "port", Lua.fromInt 587);
+                    Lua.setField (cfg, "host", Lua.fromString (S.getENVString "MAILER_HOST"));
+                    Lua.setField (cfg, "port", Lua.fromInt (S.getENVInt "MAILER_PORT"));
                     Lua.setField (cfg, "starttls", Lua.fromBool true);
-                    Lua.setField (cfg, "username", Lua.fromString "kiao.desouzza@gmail.com");
-                    Lua.setField (cfg, "password", Lua.fromString "");
+                    Lua.setField (cfg, "username", Lua.fromString (S.getENVString "MAILER_USER"));
+                    Lua.setField (cfg, "password", Lua.fromString (S.getENVString "MAILER_PASS"));
                     
                     S.mailerRequireNew cfg
                 end
-            
+
             val (S.Request req) = S.mkRequest ()
         in
             (*(#mysql_db req) := connectMySql ();
