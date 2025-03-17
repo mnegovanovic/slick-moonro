@@ -72,7 +72,31 @@ structure Slick = struct
         in
             Lua.unsafeFromValue s_escaped : string
         end
-    
+
+    fun getENVString (k: string): string =
+        let
+            val getenv_ = Lua.field (Lua.global "os", "getenv")
+            val v = Lua.call1 getenv_ #[Lua.fromString k]
+        in
+            Lua.unsafeFromValue v : string
+        end
+
+    fun getENVInt (k: string): int =
+        let
+            val getenv_ = Lua.field (Lua.global "os", "getenv")
+            val v = Lua.call1 getenv_ #[Lua.fromString k]
+        in
+            Lua.unsafeFromValue v : int
+        end
+
+    fun getENVBool (k: string): bool =
+        let
+            val getenv_ = Lua.field (Lua.global "os", "getenv")
+            val v = Lua.call1 getenv_ #[Lua.fromString k]
+        in
+            Lua.unsafeFromValue v : bool
+        end
+  
     fun action (pattern, afn) =
         let
             val pparts = String.fields (fn c => c = #"/") pattern
