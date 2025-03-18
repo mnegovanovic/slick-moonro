@@ -73,12 +73,16 @@ structure Slick = struct
             Lua.unsafeFromValue s_escaped : string
         end
 
+    exception MissingENVVariable of string
     fun getENVString (k: string): string =
         let
             val getenv_ = Lua.field (Lua.global "os", "getenv")
             val v = Lua.call1 getenv_ #[Lua.fromString k]
         in
-            Lua.unsafeFromValue v : string
+            if Lua.isNil v then
+                raise MissingENVVariable ("ENV variable "^k^" is not set")
+            else
+                Lua.unsafeFromValue v : string
         end
 
     fun getENVInt (k: string): int =
@@ -86,7 +90,10 @@ structure Slick = struct
             val getenv_ = Lua.field (Lua.global "os", "getenv")
             val v = Lua.call1 getenv_ #[Lua.fromString k]
         in
-            Lua.unsafeFromValue v : int
+            if Lua.isNil v then
+                raise MissingENVVariable ("ENV variable "^k^" is not set")
+            else
+                Lua.unsafeFromValue v : int
         end
 
     fun getENVBool (k: string): bool =
@@ -94,7 +101,10 @@ structure Slick = struct
             val getenv_ = Lua.field (Lua.global "os", "getenv")
             val v = Lua.call1 getenv_ #[Lua.fromString k]
         in
-            Lua.unsafeFromValue v : bool
+            if Lua.isNil v then
+                raise MissingENVVariable ("ENV variable "^k^" is not set")
+            else
+                Lua.unsafeFromValue v : bool
         end
   
     fun action (pattern, afn) =
