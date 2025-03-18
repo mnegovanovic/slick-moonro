@@ -5,7 +5,7 @@ struct
     fun dispatch () =
         let
             val _ = S.initCrypto ()
-            val _ = S.sessionCookieInit "test"
+            val _ = S.sessionCookieInit (S.getENVString "SESSION_SECRET")
             
             fun connectMySql (): Lua.value option =
                 let 
@@ -39,7 +39,7 @@ struct
         in
             (*(#mysql_db req) := connectMySql ();
             (#mailer req) := setupMailer ();*)
-            (#session req) := SOME (S.sessionCookieStart "test");
+            (#session req) := SOME (S.sessionCookieStart (S.getENVString "SESSION_SECRET"));
             
             S.routeRequest (S.Request req)
         end handle exc =>
