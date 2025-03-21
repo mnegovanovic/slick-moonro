@@ -17,7 +17,7 @@ fun serialize (selector: string): string =
 
 fun applyWebActionResult (selector: string) (WA.Result res: WA.result): unit =
     let
-        val stmt = "$('.label-text', $('"^selector^"')).removeClass('text-red-500');"
+        val stmt = "$('.fieldset-label', $('"^selector^"')).removeClass('text-red-500');"
         val _ = J.exec0 {stmt=stmt, res=J.unit} ()
         
         val msg = if (#ok res) then
@@ -28,12 +28,16 @@ fun applyWebActionResult (selector: string) (WA.Result res: WA.result): unit =
                 ^"</span></div>")
         val stmt = "$('.alert-container', $('"^selector^"')).html(\""^msg^"\").show();"
         val _ = J.exec0 {stmt=stmt, res=J.unit} ()
+        val stmt = "$('.alert-container', $('"^selector^"')).delay(2500).fadeOut('slow');"
+        val _ = J.exec0 {stmt=stmt, res=J.unit} ()
     in
         if (#ok res) then
             let
                 val stmt = "$('input', $('"^selector^"')).val('');"
                 val _ = J.exec0 {stmt=stmt, res=J.unit} ()
                 val stmt = "$('textarea', $('"^selector^"')).val('');"
+                val _ = J.exec0 {stmt=stmt, res=J.unit} ()
+                val stmt = "$('form', $('"^selector^"'))[0].reset();"
                 val _ = J.exec0 {stmt=stmt, res=J.unit} ()
             in
                 ()
@@ -79,10 +83,10 @@ val main_footer_c = M.mkComp mkFooter_ (fn (r, e, p) => NONE) NONE
 fun mkAHost_ () =
     let
         val e = taga "div" [("class", "grid grid-cols-1 sm:grid-cols-2 grid-rows-2 gap-4")] (
-            taga0 "img" [("class", "rounded"), ("src", "/static/img/laptop_unsplash.jpg"), ("alt", "laptop")]
+            taga0 "img" [("class", "rounded-sm"), ("src", "/static/img/laptop_unsplash.jpg"), ("alt", "laptop")]
             & taga0 "div" [("id", "a_host_1"), ("class", "text-base")]
             & taga0 "div" [("id", "a_host_2"), ("class", "text-base")]
-            & taga0 "img" [("class", "rounded"), ("src", "/static/img/drops.jpeg"), ("alt", "drops")])
+            & taga0 "img" [("class", "rounded-sm"), ("src", "/static/img/drops.jpeg"), ("alt", "drops")])
     in
         SOME e
     end
@@ -102,25 +106,22 @@ val a_host_c = M.mkComp mkAHost_ mkAHost__ NONE
 
 fun mkContactForm_ () =
     let
-        val e = taga "h2" [("class", "mt-8")] ($"Enquiry? Send us an email!") & taga "div" [("id", "contact_form_id"), ("class", "contact-form")] (
-          taga "label" [("class", "form-control w-full max-w-xs")] (
-            taga "div" [("class", "label")] (
-              taga "span" [("class", "label-text"), ("for", "name")] ($"Name?"))
-            & taga0 "input" [("type", "text"), ("name", "name"), ("placeholder", "Your name"), ("class", "input input-bordered w-full max-w-xs")])
-          
-          & taga "label" [("class", "form-control w-full max-w-xs")] (
-            taga "div" [("class", "label")] (
-              taga "span" [("class", "label-text"), ("for", "email")] ($"Email?"))
-            & taga0 "input" [("type", "text"), ("name", "email"), ("placeholder", "Your email"), ("class", "input input-bordered w-full max-w-xs")])
-          
-          & taga "label" [("class", "form-control")] (
-            taga "div" [("class", "label")] (
-              taga "span" [("class", "label-text"), ("for", "msg")] ($"Message?"))
-            & taga0 "textarea" [("class", "textarea textarea-bordered h-24"), ("name", "msg"), ("placeholder", "Your message")])
-          
-          & taga "button" [("id", "btn_submit"), ("class", "btn btn-outline mt-2")] ($"Submit")
-          & taga0 "div" [("class", "mt-4 alert-container"), ("style", "display: none;")]
-        )
+        val e = taga "div" [("id", "contact_form_id"), ("class", "form")] (tag "form"
+            (taga "fieldset" [("class", "fieldset w-xs bg-base-200 border border-base-300 p-4 rounded-box bg-micro-carbon")] (
+                taga "legend" [("class", "fieldset-legend")] ($(M.decode "Enquiry? Send us an email!"))
+                
+                & taga "label" [("class", "fieldset-label"), ("for","name")] ($(M.decode "Name?"))
+                & taga0 "input" [("type", "text"), ("name", "name"), ("placeholder", "Your name"), ("class", "input")]
+                
+                & taga "label" [("class", "fieldset-label"), ("for","email")] ($(M.decode "Email?"))
+                & taga0 "input" [("type", "text"), ("name", "email"), ("placeholder", "Your email"), ("class", "input")]
+                
+                & taga "label" [("class", "fieldset-label"), ("for","msg")] ($(M.decode "Message? (describe your project, budget etc.)"))
+                & taga0 "textarea" [("class", "textarea h-24"), ("name", "msg"), ("placeholder", "Your message")]
+                
+                & taga "button" [("id", "btn_submit"), ("class", "btn btn-primary btn-outline mt-2")] ($"Submit")
+                & taga0 "div" [("class", "mt-4 alert-container"), ("style", "display: none;")]
+        )))
     in
         SOME e
     end
