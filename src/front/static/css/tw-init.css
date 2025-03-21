@@ -1,0 +1,16 @@
+@import 'tailwindcss' source('../../../../src');
+
+@plugin "daisyui" {
+  themes: dark --default;
+}
+
+@custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
+
+@theme {
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1024px;
+  --breakpoint-2xl: 1024px;
+}
+
