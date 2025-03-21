@@ -37,7 +37,7 @@ moonro:
 	cd src/front && smltojs -basislib front.mlb && grep -oP '(?<=src=")[^"]*.js' run.html | xargs cat > app.js
 	cp src/front/app.js www/static/
 	
-	cd src/front && tailwindcss-extra-linux-x64 -c tailwind.config.js -o static/css/tw.css
+	cd src/front && tailwindcss-extra-linux-x64 -i static/css/tw-init.css -o static/css/tw.css
 	
 	cp -r src/front/static/* www/static/
 	
