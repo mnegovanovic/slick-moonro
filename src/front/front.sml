@@ -10,7 +10,7 @@ structure WA = WebAction
  *)
 fun serialize (selector: string): string =
     let
-        val stmt = "return $('"^selector^" :input').serialize();"
+        val stmt = "return $('form', $('"^selector^"')).serialize();"
         in
             J.exec0 {stmt=stmt, res=J.string} ()
         end
