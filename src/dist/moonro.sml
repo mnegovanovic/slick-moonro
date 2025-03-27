@@ -530,7 +530,7 @@ struct
                 let
                     val page_id = #id pg
                     val props = #props pg
-                    val page_class = case (findPairValue "page-class" props) of
+                    val page_class = case (findPairValue "class" props) of
                         NONE => "pg-container"
                         | SOME class => "pg-container "^class
                     val container_div = taga0 "div" [("id", page_id), ("class", page_class)]

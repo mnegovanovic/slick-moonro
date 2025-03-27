@@ -150,7 +150,7 @@ val _ = M.mkPage "/" [top_menu_c,
                       a_host_c,
                       contact_form_c,
                       main_footer_c] [("title", "Atreides Host - Bespoke digital solutions for businesses"),
-                                      ("page-class", "container mx-auto px-4")]
+                                      ("class", "container mx-auto px-4")]
 
 (*
  * MOONRO
@@ -303,7 +303,7 @@ val _ = M.mkPage "/moonro" [top_menu_c,
                             todo_new_c,
                             moonro2_c,
                             main_footer_c] [("title", "Slick&Moonro - SML web application framework"),
-                                            ("page-class", "container mx-auto px-4")]
+                                            ("class", "container mx-auto px-4")]
 
 (*
  * CMS
