@@ -237,7 +237,7 @@ fun mkTodoList__ (r, e, p) =
                         let in
                             (#done t) := SOME (not (valOf (!(#done t))));
                             M.reshow "todo_list_c";
-                            true
+                            false
                         end
                     val button_done = taga "button" [("class", "btn btn-outline btn-primary")] ($"done")
                     val _ = Js.installEventHandler button_done Js.onclick done_
@@ -246,7 +246,7 @@ fun mkTodoList__ (r, e, p) =
                         let in
                             todos := List.filter (fn (Todo x) => ((valOf (!(#text t))) <> (valOf (!(#text x))))) (!todos);
                             M.reshow "todo_list_c";
-                            true
+                            false
                         end
                     val button_delete = taga "button" [("class", "btn btn-outline btn-primary")] ($"delete")
                     val _ = Js.installEventHandler button_delete Js.onclick delete_
@@ -288,7 +288,7 @@ fun mkTodoNew__ (r, e, p) =
                 in
                     todos := (!todos) @ [todo_new];
                     M.reshow "todo_list_c";
-                    true
+                    false
                 end
             val _ = Js.installEventHandler todo_new_btn_e Js.onclick click_
         in
