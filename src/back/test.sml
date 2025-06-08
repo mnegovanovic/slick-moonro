@@ -221,7 +221,7 @@ S.action ("/test/session_2", (fn (S.Request req) =>
 S.action ("/test/mysql_query", (fn (S.Request req) =>
     let
         val db = valOf (!(#mysql_db req))
-        val rs = S.mysqlQuery db "select * from ads order by id asc;"
+        val rs = S.myQuery db "select * from ads order by id asc;"
         
         fun loopRow_ [] acc = acc
             | loopRow_ ((c,v)::pairs) acc = loopRow_ pairs (acc^"<span style='color: red;'>"^c^"</span>->"^v^" ")
@@ -238,7 +238,7 @@ S.action ("/test/mysql_query", (fn (S.Request req) =>
 S.action ("/test/mysql_columns", (fn (S.Request req) =>
     let
         val db = valOf (!(#mysql_db req))
-        val rs = S.mysqlQuery db "select * from ads order by id asc limit 1;"
+        val rs = S.myQuery db "select * from ads order by id asc limit 1;"
         val (_, row) = List.nth (rs, 0)
     in
         S.setResponseBody (S.Request req) ("<html>"
