@@ -477,11 +477,11 @@ structure Slick = struct
                             if not ok then
                                 let
                                     val err = Lua.unsafeFromValue err : string
-                                    val errcode = Lua.unsafeFromValue errcode : string
-                                    val sqlstate = Lua.unsafeFromValue sqlstate : string
+                                    val errcode = if Lua.isNil errcode then ~1 else Lua.unsafeFromValue errcode : int
+                                    val sqlstate = if Lua.isNil sqlstate then "" else Lua.unsafeFromValue sqlstate : string
                                 in
                                     setStatusCode_ 500;
-                                    say ("Slick.mysqlRequireNew() failed to connect to DB: "^err^", "^errcode^": "^sqlstate);
+                                    say ("Slick.mysqlRequireNew() failed to connect to DB: "^err^", "^(Int.toString errcode)^": "^sqlstate);
                                     NONE
                                 end
                             else
@@ -536,11 +536,60 @@ structure Slick = struct
             extractRS_ (SOME t) Lua.NIL []
         end
 
-    fun mysqlQuery (db: Lua.value) (sql: string): (int * (string * string) list) list =
+    fun myQuery (db: Lua.value) (sql: string): (int * (string * string) list) list =
         let
-            val res = Lua.method1 (db, "query") #[Lua.fromString sql]
+            val (res, err, errcode, sqlstate) = Lua.method4 (db, "query") #[Lua.fromString sql]
         in
-            List.rev (rsToPairs_ res)
+            if Lua.isFalsy res then
+                let
+                    val err = Lua.unsafeFromValue err : string
+                    val errcode = if Lua.isNil errcode then ~1 else Lua.unsafeFromValue errcode : int
+                    val sqlstate = if Lua.isNil sqlstate then "" else Lua.unsafeFromValue sqlstate : string
+                in
+                    notice ("Slick.myQuery() error: "^err^", "^(Int.toString errcode)^", "^sqlstate^". Input SQL: "^sql);
+                    []
+                end
+            else
+                List.rev (rsToPairs_ res)
+        end
+
+    fun myInsert (db: Lua.value) (sql: string): int * int =
+        let
+            val a = ref ~1
+            val lid = ref ~1
+            
+            val (res, err, errcode, sqlstate) = Lua.method4 (db, "query") #[Lua.fromString sql]
+            val err = ref (Lua.unsafeFromValue err : string)
+        in
+            if Lua.isFalsy res then
+                (!a, !lid)
+            else
+                let
+                    val _ = a := (Lua.unsafeFromValue (Lua.field (res, "affected_rows")) : int)
+                    val _ = lid := (Lua.unsafeFromValue (Lua.field (res, "insert_id")) : int)
+                in
+                    while ((!err) = "again") do
+                        let
+                            val (res1, err1, errcode1, sqlstate1) = Lua.method4 (db, "read_result") #[]
+                            val _ = err := (Lua.unsafeFromValue err1 : string)
+                        in
+                            if not (Lua.isFalsy res1) then
+                                let in
+                                    a := (!a) + (Lua.unsafeFromValue (Lua.field (res1, "affected_rows")) : int);
+                                    lid := (Lua.unsafeFromValue (Lua.field (res1, "insert_id")) : int);
+                                    ()
+                                end
+                            else
+                                let
+                                    val errcode1 = if Lua.isNil errcode1 then ~1 else Lua.unsafeFromValue errcode1 : int
+                                    val sqlstate1 = if Lua.isNil sqlstate1 then "" else Lua.unsafeFromValue sqlstate1 : string
+                                in
+                                    notice ("Slick.myInsert() error: "^(!err)^", "^(Int.toString errcode1)^", "^sqlstate1);
+                                    send500 ()
+                                end
+                        end;
+                    (!a, !lid)
+                end
         end
 
     exception InvalidColumn of string
@@ -842,5 +891,98 @@ structure Slick = struct
         in
             md5hex ((Int.toString (!random_md_5_counter_))^uuidv4 ()^(LargeInt.toString (Time.toMilliseconds (Time.now ()))))
         end
+
+    (*
+     * SHARED STORAGE
+     *)
+    val scache_ = Lua.field (Lua.field (Lua.global "ngx", "shared"), "cache")
+    
+    fun setShared (k: string) (v: string): unit =
+        Lua.method0 (scache_, "set") #[Lua.fromString k, Lua.fromString v]
+    
+    fun getShared (k: string): string option =
+        let
+            val v = Lua.method1 (scache_, "get") #[Lua.fromString k]
+        in
+            if Lua.isNil v then
+                NONE
+            else
+                SOME (Lua.unsafeFromValue v: string)
+        end
+
+    (*
+     * CRON AND TIMERS
+     * [0-59,] [0-23,] [0-6,]
+     * minutes hours   days
+     *
+     * val _ = cronNew ([0], [14,15], [0,1,2,3,4,5,6], fn () => notice "TESTING CRON")
+     *)
+    type cron_entry = int list (* minutes *) * int list (* hours *) * int list (* days of the week *) * (unit->unit) (* cfn *)
+    val cron_entries: cron_entry list ref = ref []
+    
+    exception InvalidCronMinute
+    exception InvalidCronHour
+    exception InvalidCronWeekday
+
+    fun namedTimer (name: string) (freq: int) (cfn: unit->unit): Lua.value option =
+        let
+            val tname = "TIMER-"^name
+            val t = case getShared tname of
+                NONE => let
+                        val _ = setShared tname "true"
+                        val every_ = Lua.field (Lua.field (Lua.global "ngx", "timer"), "every")
+                        val t = Lua.call1 every_ #[Lua.fromInt freq, Lua.unsafeToValue cfn]
+                    in
+                        SOME t
+                    end
+                | SOME "true" => NONE
+                | _ => NONE
+        in
+            t
+        end
+
+    fun cronNew (ce: cron_entry): unit =
+        let
+            val (minutes: int list, hours: int list, days: int list, cfn: unit->unit) = ce
+
+            val _ = List.app (fn m1 =>
+                if m1 < 0 then raise InvalidCronMinute
+                else if m1 > 59 then raise InvalidCronMinute
+                else ()) minutes
+            val _ = List.app (fn h1 =>
+                if h1 < 0 then raise InvalidCronHour
+                else if h1 > 23 then raise InvalidCronHour
+                else ()) hours
+            val _ = List.app (fn d1 =>
+                if d1 < 0 then raise InvalidCronWeekday
+                else if d1 > 6 then raise InvalidCronWeekday
+                else ()) days
+        in
+            cron_entries := ce::(!cron_entries)
+        end
+    
+    fun cronMain_ () =
+        let
+            val t1 = Date.fromTimeLocal(Time.now())
+            val minute = Date.minute t1
+            val hour = Date.hour t1
+            val day = Date.day t1
+
+            val to_run = List.filter (fn (minutes: int list, hours: int list, days: int list, cfn: unit->unit) =>
+                if List.exists (fn x => x = day) days
+                    andalso List.exists (fn x => x = hour) hours
+                    andalso List.exists (fn x => x = minute) minutes then
+                        true
+                else
+                    false) (!cron_entries)
+        in
+            List.app (fn (_, _, _, cfn: unit->unit) =>
+                let in
+                    cfn ()
+                end handle exc => notice ("Slick.cronMain_() exception in cfn(): "^(exnName exc))) to_run
+        end
+    
+    val cron_timer_ = namedTimer "CRON" 60 cronMain_
+    val _ = cronNew ([0,1,2], [13,14,15,16], [0,1,2,3,4,5,6], fn () => notice "TESTING CRON")
 end
 
