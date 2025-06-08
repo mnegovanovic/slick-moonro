@@ -184,13 +184,14 @@ struct
             J.exec0 {stmt=stmt, res=J.fptr} ()
         end
     
+    exception MissingDocumentID of string
     fun getEBI (id: string): Js.elem =
         let
             val id = if (String.isPrefix "#" id) then String.extract (id, 1, NONE) else id
         in
             case Js.getElementById Js.document id of
                 SOME e => e
-                | NONE => raise Fail ("getEBI() Missing id in document: " ^ id)
+                | NONE => raise MissingDocumentID ("getEBI() Missing id in document: " ^ id)
         end
     
     fun onDocumentReady (f: unit -> unit): unit =
