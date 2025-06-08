@@ -11,43 +11,64 @@ all).
 
 ## Getting started <a id="_moonro_getting_started"></a>
 
-Check out the source code [here](https://github.com/mnegovanovic/slick-moonro) and run it:
+Check out the source code [here](https://github.com/mnegovanovic/slick-moonro), build tools/sdk if
+needed and run demo app:
 
     $ git clone git@github.com:mnegovanovic/slick-moonro.git
     $ cd slick-moonro
-    $ make run
+    $ make sdk
+    $ source ENV.devel && make run
 
 Visit http://localhost:8080 (this all assumes you have working LunarML and SMLToJS install.
-As well, you will need [tailwindcss-extra-linux-x64](https://github.com/dobicinaitis/tailwind-cli-extra/releases).)
+As well, you will need [tailwindcss-extra-linux-x64](https://github.com/dobicinaitis/tailwind-cli-extra/releases).
+Easy way is to install the SDK.)
 
 ## Structure & Architecture <a id="_moonro_structure"></a>
 
 Lets have a look at top level directories and files:
 
+    ├── ENV.devel
     ├── install_local_rocks
+    ├── LICENSE
     ├── lua_modules
     ├── Makefile
     ├── mime.types
     ├── nginx.conf
+    ├── README.md
     ├── src
     │   ├── back
     │   │   ├── back.mlb
     │   │   ├── dispatch.sml
     │   │   ├── home.sml
-    │   │   └── millet.toml
+    │   │   ├── millet.toml
+    │   │   └── test.sml
     │   ├── dist
+    │   │   ├── frontend-session.sml
     │   │   ├── moonro.sml
     │   │   ├── slick.sml
     │   │   ├── sml-json
     │   │   ├── sml-md5
-    │   │   └── sml-setmap
+    │   │   ├── sml-setmap
+    │   │   ├── sml-sort               
+    │   │   └── utils.sml
     │   ├── front
     │   │   ├── front.mlb
     │   │   ├── front.sml
-    │   │   ├── static
-    │   │   └── tailwind.config.js
+    │   │   └── static
     │   └── shared
+    │       └── web-action.sml
+    ├── var
+    │   ├── a-host-md
+    │   │   ├── 1.md
+    │   │   ├── 2.md
+    │   │   └── ascii.md
+    │   └── moonro-md
+    │       ├── 404.md
+    │       ├── index1.md
+    │       └── index2.md
     └── watchd
+
+`ENV.devel` environment variables.
 
 `install_local_rocks`, `lua_modules` these are Lua libraries we find useful. Convenience bash
 script.
@@ -67,6 +88,8 @@ on compilation.
 `src/shared` SML application code shared by Slick and Moonro. (tweak and edit here)
 
 `src/dist` distribution SML code. (do not edit, it might change between releases)
+
+`var/` storage space
 
 `watchd` is source code changes watch script.
 
