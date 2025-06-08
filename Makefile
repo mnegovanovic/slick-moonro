@@ -11,6 +11,7 @@ all:
 	@echo " make run - build and run openresty"
 	@echo " make slick - standalone compile of the back-end"
 	@echo " make moonro - standalone compile of the front-end"
+	@echo " make sdk - install tools into /opt/sm-sdk/"
 	@echo ""
 	@echo ""
 
@@ -74,8 +75,36 @@ run: build
 	cd www && openresty -p . -c nginx.conf
 	@echo -e ${GREEN}done.${NC}
 
+.PHONY: sdk-clean
+sdk-clean:
+	sudo rm -rf sdk-build-tmp
+
 .PHONY: clean
-clean:
+clean: moonro-clean sdk-clean
 	rm -rf www
+	@echo -e ${GREEN}done.${NC}
+
+.PHONY: sdk
+sdk:
+	mkdir -p sdk-build-tmp/opt/sm-sdk/bin
+	sudo rm -rf /opt/sm-sdk
+	
+	cd sdk-build-tmp && git clone --depth 1 https://github.com/minoki/LunarML.git
+	cd sdk-build-tmp/LunarML && make && sudo make install PREFIX=/opt/sm-sdk
+	
+	cd sdk-build-tmp && git clone --depth 1 https://github.com/melsman/mlkit.git
+	cd sdk-build-tmp/mlkit && ./autobuild && ./configure --prefix=/opt/sm-sdk \
+		&& make smltojs && make smltojs_basislibs && \
+		sudo make install_smltojs && sudo make install_smltojs_basislibs
+	
+	cd /opt/sm-sdk/bin \
+		&& sudo wget https://github.com/dobicinaitis/tailwind-cli-extra/releases/download/v2.1.29/tailwindcss-extra-linux-x64 \
+		&& sudo chmod 755 tailwindcss-extra-linux-x64
+	
+	cd /opt/sm-sdk/bin \
+		&& sudo wget https://github.com/azdavis/millet/releases/download/v0.14.9/millet-ls-x86_64-unknown-linux-gnu.gz \
+		&& sudo gunzip millet-ls-x86_64-unknown-linux-gnu.gz && sudo chmod 755 millet-ls-x86_64-unknown-linux-gnu
+	
+	cd sdk-build-tmp && tar -czf ../sm-sdk-v`date +'%Y%m%d'`-1.tar.gz /opt/sm-sdk/
 	@echo -e ${GREEN}done.${NC}
 
