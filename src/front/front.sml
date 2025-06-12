@@ -1,3 +1,6 @@
+structure HomeFront =
+struct
+
 structure J = JsCore
 structure O = JsCore.Object
 structure A = JsCore.Array
@@ -351,7 +354,8 @@ fun myInit_ () =
     (M.addClass "#body_id" "bg-dark";
     M.addClass "#body_id" "text-light";
     ())*)
+end
 
-fun main () = M.init (myInit_)
+fun main () = Moonro.init (HomeFront.myInit_)
 val _ = main ()
 
