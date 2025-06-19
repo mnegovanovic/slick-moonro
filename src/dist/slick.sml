@@ -915,23 +915,27 @@ structure Slick = struct
      * [0-59,] [0-23,] [0-6,]
      * minutes hours   days
      *
-     * val _ = cronNew ([0], [14,15], [0,1,2,3,4,5,6], fn () => notice "TESTING CRON")
+     * val _ = cronNew ([0,1,2], [13,14,15,16,17,18,19], [0,1,2,3,4,5,6], "cron test 1", fn () => S.notice "TESTING CRON");
      *)
-    type cron_entry = int list (* minutes *) * int list (* hours *) * int list (* days of the week *) * (unit->unit) (* cfn *)
+    type cron_entry = (int list (* minutes of the hour *)
+        * int list (* hours of the day *)
+        * int list (* days of the week *)
+        * string (* description *)
+        * (unit->unit) (* cfn to run *))
     val cron_entries: cron_entry list ref = ref []
     
     exception InvalidCronMinute
     exception InvalidCronHour
     exception InvalidCronWeekday
 
-    fun namedTimer (name: string) (freq: int) (cfn: unit->unit): Lua.value option =
+    fun namedTimer (name: string) (freq: int) (tfn: unit->unit): Lua.value option =
         let
             val tname = "TIMER-"^name
             val t = case getShared tname of
                 NONE => let
                         val _ = setShared tname "true"
                         val every_ = Lua.field (Lua.field (Lua.global "ngx", "timer"), "every")
-                        val t = Lua.call1 every_ #[Lua.fromInt freq, Lua.unsafeToValue cfn]
+                        val t = Lua.call1 every_ #[Lua.fromInt freq, Lua.unsafeToValue tfn]
                     in
                         SOME t
                     end
@@ -943,7 +947,7 @@ structure Slick = struct
 
     fun cronNew (ce: cron_entry): unit =
         let
-            val (minutes: int list, hours: int list, days: int list, cfn: unit->unit) = ce
+            val (minutes: int list, hours: int list, days: int list, desc: string, cfn: unit->unit) = ce
 
             val _ = List.app (fn m1 =>
                 if m1 < 0 then raise InvalidCronMinute
@@ -958,6 +962,7 @@ structure Slick = struct
                 else if d1 > 6 then raise InvalidCronWeekday
                 else ()) days
         in
+            notice ("Slick.cronNew() entry initialized: '"^desc^"'");
             cron_entries := ce::(!cron_entries)
         end
     
@@ -968,7 +973,7 @@ structure Slick = struct
             val hour = Date.hour t1
             val day = Date.day t1
 
-            val to_run = List.filter (fn (minutes: int list, hours: int list, days: int list, cfn: unit->unit) =>
+            val to_run = List.filter (fn (minutes: int list, hours: int list, days: int list, desc: string, cfn: unit->unit) =>
                 if List.exists (fn x => x = day) days
                     andalso List.exists (fn x => x = hour) hours
                     andalso List.exists (fn x => x = minute) minutes then
@@ -976,13 +981,13 @@ structure Slick = struct
                 else
                     false) (!cron_entries)
         in
-            List.app (fn (_, _, _, cfn: unit->unit) =>
+            List.app (fn (_, _, _, desc: string, cfn: unit->unit) =>
                 let in
+                    notice ("Slick.cronMain() executing entry '"^desc^"'");
                     cfn ()
-                end handle exc => notice ("Slick.cronMain_() exception in cfn(): "^(exnName exc))) to_run
+                end handle exc => notice ("Slick.cronMain_() exception in cfn() for cron entry '"^desc^"': "^(exnName exc))) to_run
         end
     
     val cron_timer_ = namedTimer "CRON" 60 cronMain_
-    val _ = cronNew ([0,1,2], [13,14,15,16], [0,1,2,3,4,5,6], fn () => notice "TESTING CRON")
 end
 
