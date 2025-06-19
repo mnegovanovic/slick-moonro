@@ -997,6 +997,6 @@ structure Slick = struct
                 end handle exc => notice ("Slick.cronMain_() exception in cfn() for cron entry '"^desc^"': "^(exnName exc))) to_run
         end
     
-    val cron_timer_ = namedTimer "CRON" 60 cronMain_
+    val _ = namedTimer "CRON" 60 cronMain_
 end
 
