@@ -916,6 +916,8 @@ structure Slick = struct
      * minutes hours   days
      *
      * val _ = cronNew ([0,1,2], [13,14,15,16,17,18,19], [0,1,2,3,4,5,6], "cron test 1", fn () => S.notice "TESTING CRON");
+     *
+     * openresty needs to serve first request for CRON to kick in.
      *)
     type cron_entry = (int list (* minutes of the hour *)
         * int list (* hours of the day *)
