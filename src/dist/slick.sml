@@ -962,8 +962,8 @@ structure Slick = struct
                 else if d1 > 6 then raise InvalidCronWeekday
                 else ()) days
         in
-            notice ("Slick.cronNew() entry initialized: '"^desc^"'");
-            cron_entries := ce::(!cron_entries)
+            cron_entries := ce::(!cron_entries);
+            notice ("Slick.cronNew() entry initialized: '"^desc^"'")
         end
     
     fun cronMain_ () =
@@ -971,7 +971,15 @@ structure Slick = struct
             val t1 = Date.fromTimeLocal(Time.now())
             val minute = Date.minute t1
             val hour = Date.hour t1
-            val day = Date.day t1
+            val day = Date.weekDay t1
+            val day = case day of
+                Date.Mon => 0
+                | Date.Tue => 1
+                | Date.Wed => 2
+                | Date.Thu => 3
+                | Date.Fri => 4
+                | Date.Sat => 5
+                | Date.Sun => 6
 
             val to_run = List.filter (fn (minutes: int list, hours: int list, days: int list, desc: string, cfn: unit->unit) =>
                 if List.exists (fn x => x = day) days
@@ -980,6 +988,7 @@ structure Slick = struct
                         true
                 else
                     false) (!cron_entries)
+            val _= notice ("CRON RUN "^(Int.toString day)^"-"^(Int.toString hour)^"-"^(Int.toString minute)^" to_run has "^(Int.toString (List.length to_run))^" entries")
         in
             List.app (fn (_, _, _, desc: string, cfn: unit->unit) =>
                 let in
