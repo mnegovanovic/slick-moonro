@@ -7,7 +7,6 @@ structure SlickCrontab = struct
                 val _ = S.setShared sc_name "true"
             in
                 true
-                
             end
         | SOME "true" => false
         | _ => false
