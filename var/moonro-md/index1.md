@@ -137,7 +137,7 @@ friend (code in `src/front/front.sml`):
         let
             val e = taga0 "div" [("id", "todo_list"), ("class", "row todo-list")]
         in
-            e
+            SOME e
         end
     fun mkTodoList__ (r, e, p) =
         let
@@ -153,7 +153,7 @@ friend (code in `src/front/front.sml`):
                             let in
                                 (#done t) := SOME (not (valOf (!(#done t))));
                                 M.reshow "todo_list_c";
-                                true
+                                false
                             end
                         val button_done = taga "button" [("class", "btn btn-outline btn-primary")] ($"done")
                         val _ = Js.installEventHandler button_done Js.onclick done_
@@ -162,7 +162,7 @@ friend (code in `src/front/front.sml`):
                             let in
                                 todos := List.filter (fn (Todo x) => ((valOf (!(#text t))) <> (valOf (!(#text x))))) (!todos);
                                 M.reshow "todo_list_c";
-                                true
+                                false
                             end
                         val button_delete = taga "button" [("class", "btn btn-outline btn-primary")] ($"delete")
                         val _ = Js.installEventHandler button_delete Js.onclick delete_
@@ -181,7 +181,7 @@ friend (code in `src/front/front.sml`):
         let
             val e = taga0 "div" [("id", "todo_new"), ("class", "row todo-new")]
         in
-            e
+            SOME e
         end
     fun mkTodoNew__ (r, e, p) =
             let 
@@ -194,7 +194,7 @@ friend (code in `src/front/front.sml`):
                         M.reshow "todo_list_c";
                         false
                     end
-                val _ = M.instalKeypressEventHandler todo_new_e 13 keypress_
+                val _ = M.installKeypressEventHandler todo_new_e 13 keypress_
 
                 val todo_new_btn_e = taga "button" [("id", "todo_new_btn"), ("class", "btn btn-outline btn-primary")] ($"new")
                 fun click_ () =
@@ -204,7 +204,7 @@ friend (code in `src/front/front.sml`):
                     in
                         todos := (!todos) @ [todo_new];
                         M.reshow "todo_list_c";
-                        true
+                        false
                     end
                 val _ = Js.installEventHandler todo_new_btn_e Js.onclick click_
             in
@@ -212,7 +212,14 @@ friend (code in `src/front/front.sml`):
                   (taga "div" [("class", "col")] (todo_new_e & (tag0 "br") & todo_new_btn_e & (tag0 "br") & (tag0 "br"))))
             end
     val todo_new_c = M.mkComp mkTodoNew_ mkTodoNew__ NONE
-    val _ = M.mkPage "/moonro" [top_menu_c, moonro_toc_c, moonro1_c, todo_list_c, todo_new_c, moonro2_c, main_footer_c] [("title", "Slick&Moonro - SML web application framework")]
+    val _ = M.mkPage "/moonro" [top_menu_c,
+                                moonro_toc_c,
+                                moonro1_c,
+                                todo_list_c,
+                                todo_new_c,
+                                moonro2_c,
+                                main_footer_c] [("title", "Slick&Moonro - SML web application framework"),
+                                                ("class", "container mx-auto px-4")]
 
 Moonro is simple front-end framework. In it, web application consists of pages and each page
 is made up of components. Its best to read the source code at `src/dist/moonro.sml`.
@@ -221,12 +228,12 @@ Special attention to `Moonro.mkComp` and `Moonro.mkPage` functions as you will b
 `mkComp` takes 3 arguments: `onLoad` function, `onShow` function, optional ID (if you do not supply
 one random one will be generated).
     
-    fun mkComp (onLoad: unit -> Js.elem) (onShow: (request * Js.elem * Js.elem) -> Js.elem option) (id: string option) =
+    fun mkComp (onLoad: unit -> Js.elem option) (onShow: (request * Js.elem * Js.elem) -> Js.elem option) (id: string option): component =
         ...
 
 `mkPage` takes 3 arguments: URL pattern, component list, page props (id, title etc.)
 
-    fun mkPage (pattern: string) (cs: component list) (props: (string * string) list) =
+    fun mkPage (pattern: string) (cs: component list) (props: (string * string) list): page =
         ...
 
 ## TODO
