@@ -456,7 +456,7 @@ struct
             e
         end
 
-    fun mkComp (onLoad: unit -> Js.elem option) (onShow: (request * Js.elem * Js.elem) -> Js.elem option) (id: string option) =
+    fun mkComp (onLoad: unit -> Js.elem option) (onShow: (request * Js.elem * Js.elem) -> Js.elem option) (id: string option): component =
         let
             val id = case id of
                 NONE => randomMD5 ()
@@ -489,7 +489,7 @@ struct
             List.app reshowComp_ cs
         end
 
-    fun mkPage (pattern: string) (cs: component list) (props: (string * string) list) =
+    fun mkPage (pattern: string) (cs: component list) (props: (string * string) list): page =
         let
             val id = case (findPairValue "id" props) of
                 NONE => randomMD5 ()
