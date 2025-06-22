@@ -17,12 +17,15 @@ all:
 
 .PHONY: deploy
 deploy: build
-	rsync -avz --delete www/lua_modules/ tt@atreides-host.net:~/atreides-host-website/www/lua_modules/
-	rsync -avz --delete www/static/ tt@atreides-host.net:~/atreides-host-website/www/static/
-	rsync -avz --delete www/app.lua tt@atreides-host.net:~/atreides-host-website/www/app.lua
-	rsync -avz --delete www/mime.types tt@atreides-host.net:~/atreides-host-website/www/mime.types
-	rsync -avz --delete www/nginx.conf tt@atreides-host.net:~/atreides-host-website/www/nginx.conf
-	@echo "done."
+	rsync -avz --delete -e 'ssh -p 2222' www/lua_modules/ tt@atreides-host.net:~/atreides-host.net/www/lua_modules/
+	rsync -avz --delete -e 'ssh -p 2222' www/static/ tt@atreides-host.net:~/atreides-host.net/www/static/
+	rsync -avz --delete -e 'ssh -p 2222' www/app.lua tt@atreides-host.net:~/atreides-host.net/www/app.lua
+	rsync -avz --delete -e 'ssh -p 2222' www/mime.types tt@atreides-host.net:~/atreides-host.net/www/mime.types
+	rsync -avz --delete -e 'ssh -p 2222' nginx.prod.conf tt@atreides-host.net:~/atreides-host.net/www/nginx.conf
+	rsync -avz --delete -e 'ssh -p 2222' var/ tt@atreides-host.net:~/atreides-host.net/var/
+	rsync -avz --delete -e 'ssh -p 2222' ENV.prod tt@atreides-host.net:~/atreides-host.net/ENV.prod
+	ssh -p 2222 -t tt@atreides-host.net 'killall openresty && cd ~/atreides-host.net/ && source ENV.prod && cd ~/atreides-host.net/www && openresty -p . -c nginx.conf'
+	@echo -e ${GREEN}done.${NC}
 
 .PHONY: slick
 slick:
