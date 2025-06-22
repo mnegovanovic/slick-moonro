@@ -101,7 +101,7 @@ sdk:
 		sudo make install_smltojs && sudo make install_smltojs_basislibs
 	
 	cd /opt/sm-sdk/bin \
-		&& sudo wget https://github.com/dobicinaitis/tailwind-cli-extra/releases/download/v2.1.29/tailwindcss-extra-linux-x64 \
+		&& sudo wget https://github.com/dobicinaitis/tailwind-cli-extra/releases/download/v2.1.31/tailwindcss-extra-linux-x64 \
 		&& sudo chmod 755 tailwindcss-extra-linux-x64
 	
 	cd /opt/sm-sdk/bin \
