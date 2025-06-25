@@ -21,9 +21,10 @@ structure Slick = struct
         mailer:         Lua.value option ref,
         response:       response
     }
+    
+    datatype action_type = SIMPLE | LIVE
     type action_fn = request -> unit
-
-    val actions: (string list * action_fn) list ref = ref []
+    val actions: (string list * action_fn * action_type) list ref = ref []
     
     fun stringListToLuaArray_ (l: string list): Lua.value =
         let
@@ -106,15 +107,29 @@ structure Slick = struct
             else
                 Lua.unsafeFromValue v : bool
         end
-  
+    
+    fun ngxThreadSpawn (f: unit -> unit): unit =
+        let
+            val spawn = Lua.field (Lua.field (Lua.global "ngx", "thread"), "spawn")
+        in
+            Lua.call0 spawn #[Lua.unsafeToValue f]
+        end
+ 
     fun action (pattern, afn) =
         let
             val pparts = String.fields (fn c => c = #"/") pattern
             val pparts = List.filter (fn p => p <> "") pparts
         in
-            actions := (pparts, afn) :: (!actions)
+            actions := (pparts, afn, SIMPLE) :: (!actions)
         end
 
+    fun live (pattern, lfn) =
+        let
+            val pparts = String.fields (fn c => c = #"/") pattern
+            val pparts = List.filter (fn p => p <> "") pparts
+        in
+            actions := (pparts, lfn, LIVE) :: (!actions)
+        end
 
     fun say (s: string): unit =
         let
@@ -222,7 +237,89 @@ structure Slick = struct
             say "<h1>500 - Internal Error</h1>"
         end
 
-    fun matchPattern (pparts: string list): (action_fn * (string * string) list) option =
+    (*
+     * REDIS
+     *)
+    exception RedisInit of string
+    fun redisInit (host: string) (port: int) (topic: string): Lua.value =
+        let
+            val (ok, module) = Lua.call2 Lua.Lib.pcall #[Lua.Lib.require, Lua.fromString "resty.redis"]
+            val ok = Lua.unsafeFromValue ok : bool
+        in
+            if ok then
+                let
+                    val red = Lua.method1 (module, "new") #[]
+                in
+                    Lua.method0 (red, "connect") #[Lua.fromString host, Lua.fromInt port];
+                    Lua.method0 (red, "subscribe") #[Lua.fromString topic];
+                    red
+                end
+            else
+                raise RedisInit "resty.redis failed to initialize (1)"
+        end handle exc => raise RedisInit "resty.redis failed to initialize (2)"
+
+    fun redisReadReply (red: Lua.value): string option =
+        let
+            val msg = Lua.method1 (red, "read_reply") #[]
+        in
+            if Lua.isFalsy msg then
+                NONE
+            else
+                let
+                    val msg = Lua.sub (msg, Lua.fromInt 3)
+                in
+                    SOME (Lua.unsafeFromValue msg : string)
+                end
+        end
+    
+    fun redisPublish (red: Lua.value) (topic: string) (msg: string): unit =
+        Lua.method0 (red, "publish") #[Lua.fromString topic, Lua.fromString msg]
+ 
+    (*
+     * WS
+     *)
+    exception WSInit of string
+    fun wsInit (): Lua.value =
+        let
+            val (ok, module) = Lua.call2 Lua.Lib.pcall #[Lua.Lib.require, Lua.fromString "resty.websocket.server"]
+            val ok = Lua.unsafeFromValue ok : bool
+        in
+            if ok then
+                let
+                    val t = Lua.newTable ()
+                    val _ = Lua.setField (t, "timeout", Lua.fromInt 86400)
+                    val (ws, err) = Lua.method2 (module, "new") #[t]
+                in
+                    if Lua.isFalsy ws then
+                        raise WSInit "resty.websocket.server failed to initialize (1)"
+                    else
+                        ws
+                end
+            else
+                raise WSInit "resty.websocket.server failed to initialize (2)"
+        end handle exc => raise WSInit "resty.websocket.server failed to initialize (3)"
+    
+    fun wsSendText (ws: Lua.value) (msg: string): unit =
+        Lua.method0 (ws, "send_text") #[Lua.fromString msg]
+    
+    fun wsSendClose (ws: Lua.value): unit =
+        Lua.method0 (ws, "send_close") #[Lua.fromInt 1000, Lua.fromString "bye"]
+
+    exception WSRecvFrame of string
+    fun wsRecvFrame (ws: Lua.value): string * string =
+        let
+            val (data, typ, err) = Lua.method3 (ws, "recv_frame") #[]
+        in
+            if Lua.isFalsy data then
+                raise WSRecvFrame "fail."
+            else
+                (Lua.unsafeFromValue data : string, Lua.unsafeFromValue typ : string)
+        end
+
+    (*
+     * ROUTING
+     *)
+    fun matchPattern (pparts: string list): (action_fn * action_type * (string * string) list) option =
         let
             fun mm [] [] (args: (string * string) list): bool * ((string * string) list) = (true, args)
                 | mm route [] args = (false, [])
@@ -244,13 +341,13 @@ structure Slick = struct
                         else
                             mm route_tl request_tl args
             
-            fun m [] pparts: (action_fn * ((string * string) list)) option = NONE
-                | m ((route_pparts, pg)::tl) pparts =
+            fun m [] pparts: (action_fn * action_type * ((string * string) list)) option = NONE
+                | m ((route_pparts, afn, atype)::tl) pparts =
                     let
                         val (success, path_args) = mm route_pparts pparts []
                     in
                         if success then
-                            SOME (pg, path_args)
+                            SOME (afn, atype, path_args)
                         else
                             m tl pparts
                     end
@@ -268,11 +365,40 @@ structure Slick = struct
             in
                 case matchPattern pparts of
                     NONE => send404 ()
-                    | SOME (afn, path_args) => 
+                    | SOME (afn, atype, path_args) => 
                         let in
                             (#path_args req) := path_args;
                             (#handler req) := SOME afn;
-                            afn (Request req)
+                            case atype of
+                                SIMPLE => afn (Request req)
+                                | LIVE => let
+                                        val red = redisInit "localhost" 6379 "sm-events"
+                                        val ws = wsInit ()
+
+                                        fun readAndSend () =
+                                            while true do
+                                                let
+                                                    val msg = redisReadReply ws
+                                                in
+                                                    case msg of
+                                                        NONE => ()
+                                                        | SOME msg => wsSendText ws msg
+                                                end
+                                    in
+                                        ngxThreadSpawn readAndSend;
+                                        while true do
+                                            let
+                                                exception UnknowWSMsgType of string
+                                                val (data, typ) = wsRecvFrame ws
+                                            in
+                                                if typ = "close" then
+                                                    wsSendClose ws
+                                                else if typ = "text" then
+                                                    redisPublish red "sm-events" data
+                                                else
+                                                    raise UnknowWSMsgType "fail."
+                                            end
+                                    end
                         end handle
                             exc =>
                                 let in
