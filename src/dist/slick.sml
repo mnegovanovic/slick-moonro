@@ -317,6 +317,75 @@ structure Slick = struct
         end
 
     (*
+     * MEMCACHED
+     *)
+    exception MemcachedInit of string
+    fun memcInit (host: string) (port: int):  Lua.value =
+        let
+            val (ok, module) = Lua.call2 Lua.Lib.pcall #[Lua.Lib.require, Lua.fromString "memcached"]
+            val ok = Lua.unsafeFromValue ok : bool
+        in
+            if ok then
+                let
+                    val (memc, err) = Lua.method2 (module, "new") #[]
+                in
+                    if Lua.isFalsy memc then
+                        raise MemcachedInit "memcached failed to initialize (1)"
+                    else
+                        let
+                            val _ = Lua.method0 (memc, "set_timeout") #[Lua.fromInt 1000]
+                            val (ok, err) = Lua.method2 (memc, "connect") #[Lua.fromString host, Lua.fromInt port]
+                            val ok = Lua.unsafeFromValue ok : bool
+                        in
+                            if not ok then
+                                raise MemcachedInit "memcacehd failed to initialize (2)"
+                            else
+                                memc
+                        end
+                end
+            else
+                raise MemcachedInit "memcacehd failed to initialize (3)"
+        end handle exc => raise MemcachedInit "memcached failed to initialize (4)"
+
+    exception MemcachedSetString of string
+    fun memcSetString (memc: Lua.value) (k: string) (v: string): unit =
+        let
+            val (ok, err) = Lua.method2 (memc, "set") #[Lua.fromString k, Lua.fromString v]
+            val ok = Lua.unsafeFromValue ok : bool
+        in
+            if not ok then
+                raise MemcachedSetString (Lua.unsafeFromValue err : string)
+            else
+                ()
+        end
+    
+    exception MemcachedGetString of string
+    fun memcGetString (memc: Lua.value) (k: string): string option =
+        let
+            val (res, flags, err) = Lua.method3 (memc, "get") #[Lua.fromString k]
+        in
+            if Lua.isTruthy err then
+                raise MemcachedGetString (Lua.unsafeFromValue err : string)
+            else
+                if Lua.isFalsy res then
+                    NONE
+                else
+                    SOME (Lua.unsafeFromValue res : string)
+        end
+
+    exception MemcachedFlushAll of string
+    fun memcFlushAll (memc: Lua.value): unit =
+        let
+            val (ok, err) = Lua.method2 (memc, "flush_all") #[]
+            val ok = Lua.unsafeFromValue ok : bool
+        in
+            if not ok then
+                raise MemcachedFlushAll (Lua.unsafeFromValue err : string)
+            else
+                ()
+        end
+
+    (*
      * ROUTING
      *)
     fun matchPattern (pparts: string list): (action_fn * action_type * (string * string) list) option =
